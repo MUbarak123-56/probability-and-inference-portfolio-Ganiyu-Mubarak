@@ -1,0 +1,19 @@
+---
+title: "Student Profile"
+author: "Mubarak Ganiyu"
+date: "08/30/2021"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE)
+```
+
+
+## Zhengqi Tian
+
+Zhengqi Tian is from China, and he likes traveling. His favorite movie is Star Wars.
+
+

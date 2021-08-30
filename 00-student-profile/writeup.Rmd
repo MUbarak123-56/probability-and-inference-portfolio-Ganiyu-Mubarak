@@ -1,5 +1,5 @@
 ---
-title: "Student Profile"
+title: "Writeup"
 author: "Mubarak Ganiyu"
 date: "08/30/2021"
 output:
@@ -12,8 +12,13 @@ knitr::opts_chunk$set(echo=FALSE)
 ```
 
 
-## Zhengqi Tian
+Zhengqi Tian's Student Profile
+-------------------------------------------------------------------------------
 
-Zhengqi Tian is from China, and he likes traveling. His favorite movie is Star Wars.
+Zhengqi Tian is from Changzhou, Jiangsu in China. 
+
+After he got his accounting degree while facing real life challenges, he realized that data science will be the future of accounting industry. Being a professional in data science will help him provide more information for investors and clients.
+
+His favorite hobby is traveling. His favorite movie is Star Wars.
 
 

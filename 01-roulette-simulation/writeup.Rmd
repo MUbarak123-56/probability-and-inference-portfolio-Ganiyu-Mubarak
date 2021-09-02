@@ -125,9 +125,43 @@ one_series <- function(
 # helper function
 get_last <- function(x) x[length(x)] 
 
+# obtaining wager play
+get_play <- function(x) x[5]
+
 
 # Simulation
 walk_out_money <- rep(NA, 10000)
+play <- rep(NA, 10000)
+for(j in seq_along(walk_out_money)){
+  walk_out_money[j] <- one_series(B = 200, W = 300, L = 1000, M = 100) %>% get_last
+  play[j] <- one_series(B = 200, W = 300, L = 1000, M = 100) %>% get_play
+}
+
+# Walk out money distribution
+hist(walk_out_money, breaks = 100)
+
+# Estimated probability of walking out with extra cash
+mean(walk_out_money > 200)
+
+# Estimated earnings
+mean(walk_out_money - 200)
+
+# Earnings
+earning = walk_out_money - 200
+
+df <- as.data.frame(play = play, earning = earning)
+df %>% 
+  group_by(play) %>% 
+  summarize(mean_earning = mean(earning))
+
+ggplot(df) + geom_line(aes(x = play, y = mean_earning), color = "blue")
+```
+
+
+Tweaking the number of simulations
+```{r}
+# Simulation
+walk_out_money <- rep(NA, 5000)
 for(j in seq_along(walk_out_money)){
   walk_out_money[j] <- one_series(B = 200, W = 300, L = 1000, M = 100) %>% get_last
 }
@@ -140,8 +174,22 @@ mean(walk_out_money > 200)
 
 # Estimated earnings
 mean(walk_out_money - 200)
-```
 
+# Simulation
+walk_out_money2 <- rep(NA, 15000)
+for(j in seq_along(walk_out_money2)){
+  walk_out_money2[j] <- one_series(B = 200, W = 300, L = 1000, M = 100) %>% get_last
+}
+
+# Walk out money distribution
+hist(walk_out_money2, breaks = 100)
+
+# Estimated probability of walking out with extra cash
+mean(walk_out_money2 > 200)
+
+# Estimated earnings
+mean(walk_out_money2 - 200)
+```
 
 
 Stopping rule
@@ -234,3 +282,7 @@ plot(l2[,c(1,5)], type = "l", lwd = 5, xlab = "Game Index", ylab = "Budget")
 dev.off()
 ```
 
+
+# Results
+
+# Conclusion

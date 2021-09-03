@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
 
 # Package Installation
 
-```{r}
+```{r, include =FALSE}
 library(tidyverse)
 ```
 
@@ -161,7 +161,7 @@ sprintf("The estimated earnings for using Martingale's strategy is: %.2f", mean(
 # Estimated number of plays 
 sprintf("The average number of plays before stopping is: %.2f", mean(play_length))## average number of plays
 ```
-The first two images showcase how a playing session is bound to take place. The first one shows what is likely to happen if the player wins. The second one displays what a losing round looks like. The earnings are plotted on the y-axis while the wage number on the x-axis. According to the second image, it can be observed that a player using the Martingale's approach has a 51% chance of winning after 10000 trials, and the player is likely to lose about 46 dollars. On average it takes about 200 trials before stopping.
+The first two images showcase how a playing session is bound to take place. The first one shows what is likely to happen if the player wins. The second one displays what a losing round looks like. The earnings are plotted on the y-axis while the wage number on the x-axis. According to the second image, it can be observed that a player using the Martingale's approach has a `r mean(walk_out_money > 200)*100`% chance of winning after 10000 trials, and the player is likely to lose about `r mean(walk_out_money - 200)` dollars. On average it takes about `r mean(play_length)` trials before stopping.
 
 # Results
 
@@ -210,7 +210,7 @@ sprintf("The probability of winning is: %.2f", mean(walk_out_money > 300))
 sprintf("The estimated earnings for using Martingale's strategy is: %.2f", mean(walk_out_money - 300))
 ```
 
-Here the budget was set to 300 dollars, with the budget limit at 450 dollars and wager limit at 150 dollars. The probability of winning was about 50% and the expected earnings was -76 dollars.
+Here the budget was set to 300 dollars, with the budget limit at 450 dollars and wager limit at 150 dollars. The probability of winning was about `r mean(walk_out_money > 300)*100`% and the expected earnings was `r mean(walk_out_money - 300)` dollars.
 
 ### Dereasing the budget, waging limit and budget limit by 2x
 
@@ -235,7 +235,7 @@ sprintf("The probability of winning is: %.2f", mean(walk_out_money > 100))
 sprintf("The estimated earnings for using Martingale's strategy is: %.2f", mean(walk_out_money - 100))
 ```
 
-Here the budget was set to 100 dollars, with the budget limit at 150 dollars and wager limit at 50 dollars. The probability of winning was about 53 % and the expected earnings was -20 dollars.
+Here the budget was set to 100 dollars, with the budget limit at 150 dollars and wager limit at 50 dollars. The probability of winning was about `r mean(walk_out_money > 100)*100`% and the expected earnings was `r mean(walk_out_money - 100)` dollars.
 
 Based on the two results of increasing and decreasing the budget-related variables, it can be inferred that higher the budget-related variables, the more money one is likely to lose. 
 

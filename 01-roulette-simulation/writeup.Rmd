@@ -27,9 +27,9 @@ Martingale's Strategy is an approach that some have deemed as a foolproof way to
 
 ## Background
 
-A roulette wheel has 18 red pockets, 18 black pockets and 2 green pockets. Each pocket is designed using the same dimension. Hence, there is an equal chance of landing on any pocket. If a player places a wager (or a bet) in the form of money on whether the black or red pocket will be selected and that same pocket is selected, the player gets his equivalent amount of wager as earnings. In the case of the player's pocket not being selected, the player loses all their waged money. The Martingale's strategy requires the player to keep waging twice the amount of money waged in the previous play in order to ensure a win in the long run. For example, if I wage a bet of 10 dollars and I lose, I will need to place a bet of 20 dollars in my next try. The computer simulation needs to incorporate variables such as budget, maximum number of plays, budget limit and maximum profit. All these variables will be crucial towards simulating Martingale's strategy in action. According to our experiment, the player will have 200 dollars as his budget, and he will be allowed to play for a maximum number of 1000 plays or until he loses all his money. The player will also be made to stop if his earnings are reported to be over or equal to +100 dollars. Thereby, establishing a budget limit of 300 dollars. The simulation is set up to be repeated a certain number of trials. The final budget made for each trial is recorded, and 200 dollars is subtracted from each final budget to obtain their earnings. Then, the average earning is calculated by dividing the sum of all the earnings by the number of trials. The code that was used to create the simulation can be seen in the methods section below:
+A roulette wheel has 18 red pockets, 18 black pockets and 2 green pockets. Each pocket is designed using the same dimension. Hence, there is an equal chance of landing on any pocket. If a player places a wager (or a bet) in the form of money on whether the black or red pocket will be selected and that same pocket is selected, the player gets his equivalent amount of wager as earnings. In the case of the player's pocket not being selected, the player loses all their waged money. The Martingale's strategy requires the player to keep waging twice the amount of money waged in the previous play in order to ensure a win in the long run. For example, if I wage a bet of 10 dollars and I lose, I will need to place a bet of 20 dollars in my next try. The computer simulation needs to incorporate variables such as budget, maximum number of plays, budget limit and maximum profit. All these variables will be crucial towards simulating Martingale's strategy in action. The computer simulation was modified to effectively calculate the number of plays it takes for a player to stop playing a round of roulette based on the following requirements: when he loses all his money, when he has played 1000 times or when he has a net earning of +100 dollars. The simulation is set up to be repeated for 10000 times. The final budget made for each trial is recorded, and 200 dollars is subtracted from each final budget to obtain their earnings. Then, the average earning is calculated by dividing the sum of all the earnings by the number of trials. The code that was used to create the simulation can be seen in the methods section below:
 
-# Methods
+# Methods & Discussion
 
 ```{r}
 #' A single play of the Martingale strategy
@@ -85,7 +85,7 @@ stop_play <- function(state){
 #' Play roulette to either bankruptcy, success, or play limits
 #'
 #' @param B number, the starting budget
-#' @param W number, the budget threshold for successfully stoping
+#' @param W number, the budget threshold for successfully stopping
 #' @param L number, the maximum number of plays 
 #' @param M number, the casino wager limit
 #' @return A vector of budget values calculated after each play.
@@ -126,6 +126,20 @@ one_series <- function(
 get_last <- function(x) x[length(x)] 
 
 
+# Earnings
+# The code is modified to include a chart portraying the earnings over the course of one playing session
+set.seed(1)
+earning = one_series(B = 200, W = 300, L = 1000, M = 100) - 200
+x = 1:length(earning)
+new_df <- data.frame(x = x, earning = earning)
+ggplot(new_df) + geom_line(aes(x = x, y = earning), color = 'blue') + labs(title = sprintf("A typical round of a player winning a round of playing roulette after %d trials", length(earning)), x = "play number", y = "earning") + theme_bw()
+
+set.seed(5)
+earning = one_series(B = 200, W = 300, L = 1000, M = 100) - 200
+x = 1:length(earning)
+new_df <- data.frame(x = x, earning = earning)
+ggplot(new_df) + geom_line(aes(x = x, y = earning), color = 'blue') + labs(title = sprintf("A typical round of a player losing a round of playing roulette after %d trials", length(earning)), x = "play number", y = "earning") + theme_bw()
+
 # Simulation
 walk_out_money <- rep(NA, 10000)
 play_length <- rep(NA, 10000)
@@ -139,62 +153,92 @@ for(j in seq_along(walk_out_money)){
 hist(walk_out_money, breaks = 100)
 
 # Estimated probability of walking out with extra cash
-mean(walk_out_money > 200)
+sprintf("The probability of winning is: %.2f", mean(walk_out_money > 200))
 
 # Estimated earnings
-mean(walk_out_money - 200)
+sprintf("The estimated earnings for using Martingale's strategy is: %.2f", mean(walk_out_money - 200))
 
 # Estimated number of plays 
-mean(play_length) ## average number of plays
+sprintf("The average number of plays before stopping is: %.2f", mean(play_length))## average number of plays
 ```
+The first two images showcase how a playing session is bound to take place. The first one shows what is likely to happen if the player wins. The second one displays what a losing round looks like. The earnings are plotted on the y-axis while the wage number on the x-axis. According to the second image, it can be observed that a player using the Martingale's approach has a 51% chance of winning after 10000 trials, and the player is likely to lose about 46 dollars. On average it takes about 200 trials before stopping.
 
 # Results
 
-## Earning vs Play Sample
-
-```{r}
-# Earnings
-earning = one_series(B = 200, W = 300, L = 1000, M = 100) - 200
-x = 1:length(earning)
-new_df <- data.frame(x = x, earning = earning)
-ggplot(new_df) + geom_line(aes(x = x, y = earning), color = 'blue') + labs(title = "A typical example of a roulette round", x = "play number") + theme_bw()
-```
-
-
 ## Tweaking the simulation's parameters
 
+### Changing the number of simulations
+
 ```{r}
-# Simulation
-walk_out_money <- rep(NA, 5000)
+simulate <- function(plays) {
+  walk_out_money <- rep(NA, plays)
+  for(j in seq_along(walk_out_money)){
+    walk_out_money[j] <- one_series(B = 200, W = 300, L = 1000, M = 100) %>% get_last
+  }
+
+  # Walk out money distribution
+  hist(walk_out_money, breaks = 100, main = sprintf("Histogram of final buget for %d trials", plays))
+  sprintf("After using Martingale's strategy for %d trials, the probability of winning is: %.2f and the estimated earnings is: %.2f", plays, mean(walk_out_money > 200), mean(walk_out_money - 200))
+}
+
+simulate(1000)
+simulate(5000)
+simulate(15000)
+```
+It can be observed that increasing or decreasing the simulation does not have that much of an impact on the expected earnings or the probability of winning. Therefore, it can be inferred that this strategy is likely to yield the same average earnings for a wide range of simulations
+
+### Increasing the budget, waging limit and budget limit by 1.5x
+
+```{r}
+
+walk_out_money <- rep(NA, 10000)
+play_length <- rep(NA, 10000)
+# changing the budget to 300 dollars and maximum earnings to 150 dollars
 for(j in seq_along(walk_out_money)){
-  walk_out_money[j] <- one_series(B = 200, W = 300, L = 1000, M = 100) %>% get_last
+  round <- one_series(B = 300, W = 450, L = 1000, M = 150)
+  walk_out_money[j] <- round %>% get_last
+  play_length[j] <- length(round) # calculating the length of wagers for each round
 }
 
 # Walk out money distribution
 hist(walk_out_money, breaks = 100)
 
 # Estimated probability of walking out with extra cash
-mean(walk_out_money > 200)
+sprintf("The probability of winning is: %.2f", mean(walk_out_money > 300))
 
 # Estimated earnings
-mean(walk_out_money - 200)
+sprintf("The estimated earnings for using Martingale's strategy is: %.2f", mean(walk_out_money - 300))
+```
 
-# Simulation
-walk_out_money2 <- rep(NA, 15000)
-for(j in seq_along(walk_out_money2)){
-  walk_out_money2[j] <- one_series(B = 200, W = 300, L = 1000, M = 100) %>% get_last
+Here the budget was set to 300 dollars, with the budget limit at 450 dollars and wager limit at 150 dollars. The probability of winning was about 50% and the expected earnings was -76 dollars.
+
+### Dereasing the budget, waging limit and budget limit by 2x
+
+```{r}
+
+walk_out_money <- rep(NA, 10000)
+play_length <- rep(NA, 10000)
+# changing the budget to 100 dollars and maximum earnings to 50 dollars
+for(j in seq_along(walk_out_money)){
+  round <- one_series(B = 100, W = 150, L = 1000, M = 50)
+  walk_out_money[j] <- round %>% get_last
+  play_length[j] <- length(round) # calculating the length of wagers for each round
 }
 
 # Walk out money distribution
-hist(walk_out_money2, breaks = 100)
+hist(walk_out_money, breaks = 100)
 
 # Estimated probability of walking out with extra cash
-mean(walk_out_money2 > 200)
+sprintf("The probability of winning is: %.2f", mean(walk_out_money > 100))
 
 # Estimated earnings
-mean(walk_out_money2 - 200)
+sprintf("The estimated earnings for using Martingale's strategy is: %.2f", mean(walk_out_money - 100))
 ```
+
+Here the budget was set to 100 dollars, with the budget limit at 150 dollars and wager limit at 50 dollars. The probability of winning was about 53 % and the expected earnings was -20 dollars.
+
+Based on the two results of increasing and decreasing the budget-related variables, it can be inferred that higher the budget-related variables, the more money one is likely to lose. 
 
 # Conclusion
 
-
+The Martingale Strategy was an amazing strategy to explore from a statistical standpoint because of it deploys statistical techniques in the real world. Martingale's theory about his strategy being error-proof was proven wrong because it was proven to only work **half of the time**. Any one who wants to play a game of roulette should take note of this information next time before playing. An improvement for this strategy will be to account for what happens when the green pocket is selected on the roulette wheel. Should the player get half of his wager back or should he get nothing? 

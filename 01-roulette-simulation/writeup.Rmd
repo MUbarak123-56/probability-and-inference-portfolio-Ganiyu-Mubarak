@@ -14,7 +14,6 @@ output:
 knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
 ```
 
-# Package Installation
 
 ```{r, include =FALSE}
 library(tidyverse)
@@ -137,7 +136,7 @@ set.seed(5)
 earning = one_series(B = 200, W = 300, L = 1000, M = 100) - 200
 x = 1:length(earning)
 new_df <- data.frame(x = x, earning = earning)
-ggplot(new_df) + geom_line(aes(x = x, y = earning), color = 'blue') + labs(title = sprintf("A typical round of a player losing a round of playing roulette after %d trials", length(earning)), x = "play number", y = "earning") + theme_bw()
+ggplot(new_df) + geom_line(aes(x = x, y = earning), color = 'red') + labs(title = sprintf("A typical round of a player losing a round of playing roulette after %d trials", length(earning)), x = "play number", y = "earning") + theme_bw()
 
 # Simulation
 walk_out_money <- rep(NA, 10000)
@@ -240,4 +239,4 @@ Based on the two results of increasing and decreasing the budget-related variabl
 
 # Conclusion
 
-The Martingale Strategy was an amazing strategy to explore from a statistical standpoint because of it deploys statistical techniques in the real world. Martingale's theory about his strategy being error-proof was proven wrong because it was proven to only work **half of the time**. Any one who wants to play a game of roulette should take note of this information next time before playing. An improvement for this strategy will be to account for what happens when the green pocket is selected on the roulette wheel. Should the player get half of his wager back or should he get nothing? 
+The Martingale's strategy was an amazing strategy to explore from a statistical standpoint because of it deploys statistical techniques in the real world. Martingale's theory about his strategy being error-proof was proven wrong because it was proven to only work **half of the time**. Any one who wants to play a game of roulette using Martingale's strategy should take note of this information next time before playing so they are not too overconfident in the ability of the strategy to win. An improvement for this strategy will be to account for what happens when the green pocket is selected on the roulette wheel. Should the player get half of his wager back or should he get nothing? 

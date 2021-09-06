@@ -129,16 +129,16 @@ get_last <- function(x) x[length(x)]
 # Earnings
 # The code is modified to include a chart portraying the earnings over the course of one playing session
 set.seed(1)
-earning = one_series(B = 200, W = 300, L = 1000, M = 100) - 200
-x = 1:length(earning)
+earning <- one_series(B = 200, W = 300, L = 1000, M = 100) - 200
+x <- 1:length(earning)
 new_df <- data.frame(x = x, earning = earning)
-ggplot(new_df) + geom_line(aes(x = x, y = earning), color = 'blue') + labs(title = sprintf("A typical round of a player winning a round of playing roulette after %d trials", length(earning)), x = "play number", y = "earning") + theme_bw()
+ggplot(new_df) + geom_line(aes(x = x, y = earning), color = 'blue') + labs(title = sprintf("A typical round of a player winning roulette after %d trials", length(earning)), x = "play number", y = "earning") + theme_classic()
 
 set.seed(5)
-earning = one_series(B = 200, W = 300, L = 1000, M = 100) - 200
-x = 1:length(earning)
+earning <- one_series(B = 200, W = 300, L = 1000, M = 100) - 200
+x <- 1:length(earning)
 new_df <- data.frame(x = x, earning = earning)
-ggplot(new_df) + geom_line(aes(x = x, y = earning), color = 'red') + labs(title = sprintf("A typical round of a player losing a round of playing roulette after %d trials", length(earning)), x = "play number", y = "earning") + theme_bw()
+ggplot(new_df) + geom_line(aes(x = x, y = earning), color = 'red') + labs(title = sprintf("A typical round of a player losing roulette after %d trials", length(earning)), x = "play number", y = "earning") + theme_classic()
 
 # Simulation
 walk_out_money <- rep(NA, 10000)
@@ -214,7 +214,7 @@ sprintf("The estimated earnings for using Martingale's strategy is: %.2f", mean(
 
 Here the budget was set to 300 dollars, with the budget limit at 450 dollars and wager limit at 150 dollars. The probability of winning was about `r mean(walk_out_money > 300)*100`% and the expected earnings was `r mean(walk_out_money - 300)` dollars.
 
-### Dereasing the budget, waging limit and budget limit by 2x
+### Decreasing the budget, waging limit and budget limit by 2x
 
 ```{r}
 

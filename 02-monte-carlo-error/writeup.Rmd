@@ -1,0 +1,23 @@
+---
+title: "Monte Carlo Error"
+author: 'Mubarak Ganiyu'
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: yes
+    number_sections: yes
+    toc_depth: 3
+    toc_float: yes
+---
+
+
+```{r global options, include = FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
+```
+
+
+```{r, include =FALSE}
+library(tidyverse)
+```
+
+# Introduction

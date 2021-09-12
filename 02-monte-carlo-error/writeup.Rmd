@@ -90,7 +90,7 @@ ggplot(df) +
   scale_x_continuous(breaks=seq(2, 15, 1), labels=c(unique(as.character(df$power_2)))) + 
   theme_bw()
 ```
-The chart above displays the absolute error on the y-axis, and number of trials on the x-axis. Regardless of the probability value, it turns out that as the number of trials increases, the absolute error decreases to approximately zero. Generally speaking, in the leftmost region of the chart, the higher the probability value, the higher the absolute error.
+The chart above displays the absolute error on the y-axis, and number of trials on the x-axis. Regardless of the probability value, it turns out that as the number of trials increases, the absolute error decreases to approximately zero. Generally speaking, in the leftmost region (N < 64) of the chart, the higher the probability value, the higher the absolute error.
 
 ```{r, fig.width = 10, fig.height = 6}
 df$actual <- as.character(df$actual)
@@ -104,7 +104,7 @@ ggplot(df) +
   theme_bw()
 
 ```
-The chart above displays the relative error on the y-axis, and number of trials on the x-axis. Regardless of the probability value, it turns out that as the number of trials increases, the relative error decreases to approximately zero. Generally speaking, in the leftmost region of the chart, the higher the probability value, the lower the relative error. The reason behind this reversed outcome for the relative error chart, as compared to that of the absolute error, has to do with the fact that the absolute errors of the bigger probability values are being divided by bigger probability values to obtain the relative errors.
+The chart above displays the relative error on the y-axis, and number of trials on the x-axis. Regardless of the probability value, it turns out that as the number of trials increases, the relative error decreases to approximately zero. Generally speaking, in the leftmost region (N < 64) of the chart, the higher the probability value, the lower the relative error. The reason behind this reversed outcome for the relative error chart, as compared to that of the absolute error, has to do with the fact that the absolute errors of the bigger probability values are being divided by bigger probability values to obtain the relative errors.
 
 # Conclusion
 

@@ -1,6 +1,6 @@
 ---
 title: "Monte Carlo Error"
-author: 'Mubarak Ganiyu'
+author: "Mubarak Ganiyu"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
   html_document:
@@ -37,29 +37,32 @@ The code written below shows how the absolute and relative errors were generated
 
 ```{r}
 # Creating empty vectors that will be used to record important variables later
-n <- rep(NA, 14)
-log_2_scale <- rep(NA, 14)
-p_0_01 <- rep(NA, 14)
-p_0_05 <- rep(NA, 14)
-p_0_10 <- rep(NA, 14)
-p_0_25 <- rep(NA, 14)
-p_0_50 <- rep(NA, 14)
+n <- rep(0, 14)
+two_to_power <- rep(0, 14)
+p_0_01 <- rep(0, 14)
+p_0_05 <- rep(0, 14)
+p_0_10 <- rep(0, 14)
+p_0_25 <- rep(0, 14)
+p_0_50 <- rep(0, 14)
 
 # Using a for loop to run numerous simulations for different combinations
-for (i in 2:15) {
-  n[i] <- i
-  log_2_scale[i] <- 2**i
-  p_0_01[i] <- rbinom(1,2**i,0.01)
-  p_0_05[i] <- rbinom(1,2**i,0.05)
-  p_0_10[i] <- rbinom(1,2**i,0.10)
-  p_0_25[i] <- rbinom(1,2**i,0.25)
-  p_0_50[i] <- rbinom(1,2**i,0.50)
+for (i in 1:14) {
+  m <- i + 1
+  n[i] <- m
+  two_to_power[i] <- 2**m
+  # 1000 observations were ran for each combination.Then, the mean
+  # of the outputs was obtained and recorded.
+  p_0_01[i] <- mean(rbinom(1000,2**m,0.01))
+  p_0_05[i] <- mean(rbinom(1000,2**m,0.05))
+  p_0_10[i] <- mean(rbinom(1000,2**m,0.10))
+  p_0_25[i] <- mean(rbinom(1000,2**m,0.25))
+  p_0_50[i] <- mean(rbinom(1000,2**m,0.50))
 }
 
 # Creating a data frame that stores the output of the for loop iteration into columns
-df <- data.frame(number = n,log_2 = log_2_scale, p_0_01 = p_0_01, p_0_05 = p_0_05, p_0_10 = p_0_10, p_0_25 = p_0_25, p_0_50 = p_0_50)
+df <- data.frame(number = n,power_2 = two_to_power, p_0_01 = p_0_01, p_0_05 = p_0_05, p_0_10 = p_0_10, p_0_25 = p_0_25, p_0_50 = p_0_50)
 
-# Wrangling the dataset to make it become more readable to the reader. The probability columns were rearranged into a new column.
+# Wrangling the data set to make it become more readable to the reader. The probability columns were rearranged into a new column.
 df <- df %>% 
   gather(p_0_01:p_0_50, key = "actual", value = "pred")
 df$actual <- str_replace_all(df$actual, "p_", "")
@@ -68,12 +71,11 @@ df$actual <- as.double(df$actual)
 
 # Creating two new columns for absolute error and relative error
 df <- df %>% 
-  mutate(pred_prob = pred/log_2) %>% 
+  mutate(pred_prob = pred/power_2) %>% 
   mutate(absolute = abs(pred_prob - actual), relative = abs(pred_prob-actual)/actual)
-df <- na.omit(df) # Removing NA values in the dataset
-head(df,10)
+df <- na.omit(df) # Removing NA values in the data set
+head(df)
 ```
-
 
 # Results
 
@@ -82,10 +84,10 @@ df$actual <- as.character(df$actual) # changing the actual column into a charact
 
 # Plotting the absolute error chart
 ggplot(df) +
-  geom_point(aes(x = number, y = absolute, color = actual), size = 3) + 
+  geom_point(aes(x = number, y = absolute, color = actual), size = 2) + 
   geom_line(aes(x = number, y = absolute, color = actual)) + 
   labs(x = parse(text = "N~(log[2]~scale)"), y = "absolute error", title = "Absolute error chart") +
-  scale_x_continuous(breaks=seq(2, 15, 1), labels=c(unique(as.character(df$log_2)))) +
+  scale_x_continuous(breaks=seq(2, 15, 1), labels=c(unique(as.character(df$power_2)))) + 
   theme_bw()
 ```
 The chart above displays the absolute error on the y-axis, and number of trials on the x-axis. Regardless of the probability value, it turns out that as the number of trials increases, the absolute error decreases to approximately zero. Generally speaking, in the leftmost region of the chart, the higher the probability value, the higher the absolute error.
@@ -95,14 +97,14 @@ df$actual <- as.character(df$actual)
 
 # Plotting the relative error chart
 ggplot(df) +
-  geom_point(aes(x = number, y = relative, color = actual), size = 3) + 
+  geom_point(aes(x = number, y = relative, color = actual), size = 2) + 
   geom_line(aes(x = number, y = relative, color = actual)) +
   labs(x = parse(text = "N~(log[2]~scale)"), y = "relative error", title = "Relative error chart") +
-  scale_x_continuous(breaks=seq(2, 15, 1), labels=c(unique(as.character(df$log_2)))) +
+  scale_x_continuous(breaks=seq(2, 15, 1), labels=c(unique(as.character(df$power_2)))) +
   theme_bw()
 
 ```
-The chart above displays the relative error on the y-axis, and number of trials on the x-axis. Regardless of the probability value, it turns out that as the number of trials increases, the relative error decreases to approximately zero. Generally speaking, in the leftmost region of the chart, the higher the probability value, the lower the relative error.
+The chart above displays the relative error on the y-axis, and number of trials on the x-axis. Regardless of the probability value, it turns out that as the number of trials increases, the relative error decreases to approximately zero. Generally speaking, in the leftmost region of the chart, the higher the probability value, the lower the relative error. The reason behind this reversed outcome for the relative error chart, as compared to that of the absolute error, has to do with the fact that the absolute errors of the bigger probability values are being divided by bigger probability values to obtain the relative errors.
 
 # Conclusion
 

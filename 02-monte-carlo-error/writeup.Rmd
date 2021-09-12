@@ -17,6 +17,7 @@ knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
 
 
 ```{r, include =FALSE}
+# Loading the tidyverse package
 library(tidyverse)
 ```
 
@@ -35,6 +36,7 @@ The code written below shows how the absolute and relative errors were generated
 # Methods
 
 ```{r}
+# Creating empty vectors that will be used to record important variables later
 n <- rep(NA, 14)
 log_2_scale <- rep(NA, 14)
 p_0_01 <- rep(NA, 14)
@@ -43,6 +45,7 @@ p_0_10 <- rep(NA, 14)
 p_0_25 <- rep(NA, 14)
 p_0_50 <- rep(NA, 14)
 
+# Using a for loop to run numerous simulations for different combinations
 for (i in 2:15) {
   n[i] <- i
   log_2_scale[i] <- 2**i
@@ -53,17 +56,21 @@ for (i in 2:15) {
   p_0_50[i] <- rbinom(1,2**i,0.50)
 }
 
+# Creating a data frame that stores the output of the for loop iteration into columns
 df <- data.frame(number = n,log_2 = log_2_scale, p_0_01 = p_0_01, p_0_05 = p_0_05, p_0_10 = p_0_10, p_0_25 = p_0_25, p_0_50 = p_0_50)
 
+# Wrangling the dataset to make it become more readable to the reader. The probability columns were rearranged into a new column.
 df <- df %>% 
   gather(p_0_01:p_0_50, key = "actual", value = "pred")
 df$actual <- str_replace_all(df$actual, "p_", "")
 df$actual <- str_replace_all(df$actual, "_", ".")
 df$actual <- as.double(df$actual)
+
+# Creating two new columns for absolute error and relative error
 df <- df %>% 
   mutate(pred_prob = pred/log_2) %>% 
   mutate(absolute = abs(pred_prob - actual), relative = abs(pred_prob-actual)/actual)
-df <- na.omit(df)
+df <- na.omit(df) # Removing NA values in the dataset
 head(df,10)
 ```
 
@@ -71,11 +78,13 @@ head(df,10)
 # Results
 
 ```{r, fig.width = 10, fig.height = 6}
-df$actual <- as.character(df$actual)
+df$actual <- as.character(df$actual) # changing the actual column into a character vector
+
+# Plotting the absolute error chart
 ggplot(df) +
   geom_point(aes(x = number, y = absolute, color = actual), size = 3) + 
   geom_line(aes(x = number, y = absolute, color = actual)) + 
-  labs(x = "N (log 2 scale)", y = "absolute error", title = "Absolute error chart") +
+  labs(x = parse(text = "N~(log[2]~scale)"), y = "absolute error", title = "Absolute error chart") +
   scale_x_continuous(breaks=seq(2, 15, 1), labels=c(unique(as.character(df$log_2)))) +
   theme_bw()
 ```
@@ -83,10 +92,12 @@ The chart above displays the absolute error on the y-axis, and number of trials 
 
 ```{r, fig.width = 10, fig.height = 6}
 df$actual <- as.character(df$actual)
+
+# Plotting the relative error chart
 ggplot(df) +
   geom_point(aes(x = number, y = relative, color = actual), size = 3) + 
   geom_line(aes(x = number, y = relative, color = actual)) +
-  labs(x = "N (log 2 scale)", y = "relative error", title = "Relative error chart") +
+  labs(x = parse(text = "N~(log[2]~scale)"), y = "relative error", title = "Relative error chart") +
   scale_x_continuous(breaks=seq(2, 15, 1), labels=c(unique(as.character(df$log_2)))) +
   theme_bw()
 
@@ -96,3 +107,6 @@ The chart above displays the relative error on the y-axis, and number of trials 
 # Conclusion
 
 Nothing is perfect in this world. Mistakes are just as natural as breathing itself. Hence, we should not be surprised that computer functions also make errors. However, we should not be complacent about the errors that computer simulations make. We should strive to reduce the magnitude of error made by computer simulations. In the case of the Monte Carlo method, the best way to reduce the degree of error seems to be an increment in the number of trials.
+
+
+

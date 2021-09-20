@@ -35,53 +35,48 @@ The code written below shows how the absolute and relative errors were generated
 
 # Methods
 
-```{r}
-# Creating empty vectors that will be used to record important variables later
-n <- rep(0, 14)
-two_to_power <- rep(0, 14)
-p_0_01 <- rep(0, 14)
-p_0_05 <- rep(0, 14)
-p_0_10 <- rep(0, 14)
-p_0_25 <- rep(0, 14)
-p_0_50 <- rep(0, 14)
+```{r, warning = FALSE}
 
-# Using a for loop to run numerous simulations for different combinations
-for (i in 1:14) {
-  m <- i + 1
-  n[i] <- m
-  two_to_power[i] <- 2**m
-  # 1000 observations were ran for each combination.Then, the mean
+# Creating empty vectors that will be used to record important variables later
+n <- c()
+two_to_power <- c()
+absolute <- c()
+relative <- c()
+
+monte <- function(j) {
+  for (i in 1:14) {
+    m <- i + 1
+    n[i] <- m
+    two_to_power[i] <- 2^m
+    neo <- 2^m
+  # 100000 observations were ran for each combination.Then, the mean
   # of the outputs was obtained and recorded.
-  p_0_01[i] <- mean(rbinom(1000,2**m,0.01))
-  p_0_05[i] <- mean(rbinom(1000,2**m,0.05))
-  p_0_10[i] <- mean(rbinom(1000,2**m,0.10))
-  p_0_25[i] <- mean(rbinom(1000,2**m,0.25))
-  p_0_50[i] <- mean(rbinom(1000,2**m,0.50))
+    p <- rbinom(100000,neo,j)/neo
+  # Creating two new columns for absolute error and relative error
+    absolute[i] <- mean(abs(p - j))
+    relative[i] <- mean((abs(p - j)/j))
+  }
+  # Creating a dataframe for the specific probability value
+  new_df <- data.frame(number = n, power_2 = two_to_power, absolute = absolute, relative = relative, actual = j)
+  return(new_df)
 }
 
-# Creating a data frame that stores the output of the for loop iteration into columns
-df <- data.frame(number = n,power_2 = two_to_power, p_0_01 = p_0_01, p_0_05 = p_0_05, p_0_10 = p_0_10, p_0_25 = p_0_25, p_0_50 = p_0_50)
+# running the monte function for the different probability values
+df001 <- monte(0.01) 
+df005 <- monte(0.05)
+df010 <- monte(0.10)
+df025 <- monte(0.25)
+df050 <- monte(0.50)
+df <- rbind(df001, df005, df010, df025, df050)
 
-# Wrangling the data set to make it become more readable to the reader. The probability columns were rearranged into a new column.
-df <- df %>% 
-  gather(p_0_01:p_0_50, key = "actual", value = "pred")
-df$actual <- str_replace_all(df$actual, "p_", "")
-df$actual <- str_replace_all(df$actual, "_", ".")
-df$actual <- as.double(df$actual)
-
-# Creating two new columns for absolute error and relative error
-df <- df %>% 
-  mutate(pred_prob = pred/power_2) %>% 
-  mutate(absolute = abs(pred_prob - actual), relative = abs(pred_prob-actual)/actual)
-df <- na.omit(df) # Removing NA values in the data set
+df$actual <- as.character(df$actual) #  changing the actual column into a character vector
 head(df)
 ```
+
 
 # Results
 
 ```{r, fig.width = 10, fig.height = 6}
-df$actual <- as.character(df$actual) # changing the actual column into a character vector
-
 # Plotting the absolute error chart
 ggplot(df) +
   geom_point(aes(x = number, y = absolute, color = actual), size = 2) + 
@@ -93,8 +88,6 @@ ggplot(df) +
 The chart above displays the absolute error on the y-axis, and number of trials on the x-axis. Regardless of the probability value, it turns out that as the number of trials increases, the absolute error decreases to approximately zero. Generally speaking, in the leftmost region (N < 64) of the chart, the higher the probability value, the higher the absolute error.
 
 ```{r, fig.width = 10, fig.height = 6}
-df$actual <- as.character(df$actual)
-
 # Plotting the relative error chart
 ggplot(df) +
   geom_point(aes(x = number, y = relative, color = actual), size = 2) + 

@@ -1,0 +1,45 @@
+---
+title: "How often does the better team win the World Series?"
+author: "Mubarak Ganiyu"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: yes
+    number_sections: yes
+    toc_depth: 3
+    toc_float: yes
+---
+
+```{r global options, include = FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
+```
+
+
+```{r, include =FALSE}
+# Loading the tidyverse package
+library(tidyverse)
+```
+
+# Introduction
+
+Baseball 
+
+
+# Method
+
+# Questions and Answers
+
+1. What is the probability that the Braves win the World Series given that `P(B)= 0.55`?
+
+```{r}
+pnbinom(3,4,0.55)
+```
+
+2. What is the probability that the Braves win the World Series given that `P(B)=x`? This will be a figure (see below) with PB on the x-axis and P(Braves win World Series) on the y-axis.
+
+```{r}
+vec <- seq(0.5,1.0,0.01)
+prob <- pnbinom(3,4, vec)
+new_df <- data.frame(winning = vec, probability = prob)
+new_df
+```

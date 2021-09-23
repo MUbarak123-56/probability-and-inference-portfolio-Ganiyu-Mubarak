@@ -108,7 +108,7 @@ ggplot(new_df, aes(x = probability, y=stopping)) +
 ```{r}
 p_055 <- pnbinom(3,4,0.55)
 p_045 <- pnbinom(3,4,0.45)
-p_055_win7 <- p_055/(p_055+p_045)
+p_055_win7 <- (0.55*p_055)/(0.55*p_055+0.45*p_045)
 p_055_win7
 ```
 

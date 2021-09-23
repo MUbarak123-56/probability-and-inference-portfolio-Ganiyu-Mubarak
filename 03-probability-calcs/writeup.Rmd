@@ -35,11 +35,81 @@ Baseball
 pnbinom(3,4,0.55)
 ```
 
+The Probability that the Braves will win the World Series given that `P(B)= 0.55` is 0.608
+
 2. What is the probability that the Braves win the World Series given that `P(B)=x`? This will be a figure (see below) with PB on the x-axis and P(Braves win World Series) on the y-axis.
 
 ```{r}
 vec <- seq(0.5,1.0,0.01)
 prob <- pnbinom(3,4, vec)
-new_df <- data.frame(winning = vec, probability = prob)
-new_df
+df <- data.frame(probability = vec, winning = prob)
+head(df)
 ```
+
+```{r, fig.width=10, fig.height=7}
+ggplot(df, aes(x = probability, y=winning)) +
+  geom_point(color = "blue") +
+  geom_line(color = "red") +
+  labs(x = "Probability of the Braves winning a head-to-head matchup",
+       y = "Pr('Win World Series')",
+       title = "Probability of winning the world series") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust=0.5))
+``` 
+
+3. Suppose one could change the World Series to be best-of-9 or some other best-of-X series. What is the shortest series length so that `P(Braves win World Series|P(B)=.55) ≥ 0.8`?
+
+```{r}
+calc <- function(n, x) {
+  vec <- c()
+  for (i in 1:n) {
+      r <- i
+      k <- r-1
+      if (pnbinom(i-1, i, x) >= 0.8) {
+        vec[i] <- 2*i-1
+      }
+  }
+  vec <- vec[!is.na(vec)]
+  names(vec) <- NULL
+  return(vec[1])
+}
+calc(50, 0.55)
+``` 
+
+The shortest series length for `P(Braves win World Series|P(B)=.55) ≥ 0.8` to occur is 36
+
+4. What is the shortest series length so that `P(Braves win World Series|P(B)=0.55)≥0.8`? This will be a figure (see below) with PB on the x-axis and series length is the y-axis.
+
+```{r}
+proba <- seq(0.51,1.0,0.01)
+rec <- c()
+i = 1
+for (j in proba) {
+  rec[i] <- calc(1000, j)
+  i = i + 1
+}
+new_df = data.frame(probability = proba, stopping = rec)
+head(new_df)
+```
+
+```{r, fig.width=10, fig.height=7}
+ggplot(new_df, aes(x = probability, y=stopping)) +
+  geom_point(color = "blue") +
+  geom_line(color = "red") +
+  labs(x = "Probability of the Braves winning a head-to-head matchup",
+       y = "Series Length",
+       title = "Shortest series so that P (Win WS given p) >= 0.8") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust=0.5))
+```
+
+5. Calculate `P(P(B)=0.55|Braves win World Series in 7 games)` under the assumption that either `P(B)=0.55` or `P(B)=0.45`. Explain your solution.
+
+```{r}
+p_055 <- pnbinom(3,4,0.55)
+p_045 <- pnbinom(3,4,0.45)
+p_055_win7 <- p_055/(p_055+p_045)
+p_055_win7
+```
+
+# Conclusion

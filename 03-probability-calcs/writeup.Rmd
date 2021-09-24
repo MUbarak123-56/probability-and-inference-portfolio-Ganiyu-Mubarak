@@ -30,35 +30,60 @@ img_r <- readPNG("/cloud/project/03-probability-calcs/atlanta-braves-logo-font.p
 
 # Introduction
 
-Baseball 
-
+Baseball and statistics are two domains that seem mutually exclusive at first, but upon proper evaluation one can see how a field like statistics ties into baseball. The Baseball World Series is the final event of the baseball season used to determine the overall champion in Major League Baseball. Two teams battle it out over the course of a maximum of seven games to become the undisputed champion of baseball. This event is often called Best-of-7 series. The moment one team wins 4 games, it is over and that team is declared the winner. This is a case in baseball in which statistics is applicable. Using the rules of probability, it is quite possible to calculate the odds of finalists winning the championship. The appropriate method to use is called Negative Binomial Distribution, and its concept will be discussed in the next chapter.
 
 # Method
 
+The Negative Binomial Distribution is a statistical concept that strives to calculate the probability of a specific outcome occurring at specific number of times based on the condition that its complementary outcome occurs at another specific number of times. For instance, in an event in which I toss a coin numerous times, I might want to calculate the probability of tossing 3 tails before getting 3 heads. I could start off by realizing that to get 3 tails before 3 heads, the maximum number of heads in any round of coin tossing is going to be 2 for this event to be realistic. Therefore, I will need to use negative binomial distribution formula to calculate the probabilities for situations in which there are 3 tails zero head, 3 tails one head and 3 tails 2 heads. Then, I will sum up all the probabilities to get the actual value. The general discrete formula for the Negative Binomial Distribution can be seen below:
+
+$$P(X = k) = {k+r-1 \choose r-1}*(p)^r*(1-p)^k $$
+In the formula above, k is the number of failures required for the event to be valid, r is the number of successes. Therefore in our example above, k can be 0,1,2 while r will be 3 at all times. k represents heads, while r represents tails. 
+
 # Questions and Answers
+
+Now that we know how Negative Binomial distribution works, and how it can be used to determine the winner of the World Series championship, it is high time we saw it in action. Below are some questions that have been provided about a World Series game between the Atlanta Braves and New York Yankees. 
+
+Setup:
+
+- Suppose that the Braves and the Yankees are teams competing in the World Series.
+- Suppose that in any given game, the probability that the Braves win is P(B) and the probability that the Yankees win is P(Y)=1−P(B).
+
+Assumption:
+
+Some assumptions will be made about the gaming setup before we proceed to answer the questions. 
+
+- To win a game the winner will need to win 4 games. Therefore, we are conducting the negative binomial distribution values based on winning 4 games before losing 4 games. Hence, the winner can only lose a maximum of three games.
+
+- To assume that in order to be declared a winner, the winner, in our case the Braves, needs to have a winning percentage of > 0.5. 1 is the maximum probability of the Braves winning.
 
 1. What is the probability that the Braves win the World Series given that `P(B)= 0.55`?
 
 ```{r}
-pnbinom(3,4,0.55)
+p_055 <- pnbinom(3,4,0.55) # pbinom(k,r,p) 
+p_055
+# As illustrated above k stands for losses, while r stands for wins, p is the probability of winning
+# The pnbinom function uses these three values above to calculate all the probability that r wins before k + 1 losses. p stands for the probability of winning.
 ```
 
-The Probability that the Braves will win the World Series given that `P(B)= 0.55` is 0.608
+The Probability that the Braves will win the World Series given that `P(B)= 0.55` is 
+`r p_055`
 
 2. What is the probability that the Braves win the World Series given that `P(B)=x`? This will be a figure (see below) with PB on the x-axis and P(Braves win World Series) on the y-axis.
 
 ```{r}
-vec <- seq(0.51,1.0,0.01)
-prob <- pnbinom(3,4, vec)
+vec <- seq(0.51,1.0,0.01) # creating a vector of numbers from 0.51 to 1
+prob <- pnbinom(3,4, vec) # varying the value of p to obtain different probability values of the Braves winning
 df <- data.frame(probability = vec, winning = prob)
 head(df)
 ```
 
 ```{r, fig.width=10, fig.height=7}
-ggplot(df, aes(x = probability, y=winning)) +
-  geom_point(color = "blue") +
+# Creating a plot of probability of Braves winning the World Series against
+# the probability of the Braves winning a head-to-head match-up
+ggplot(df, aes(x = probability, y=winning)) + 
+  geom_point(color = "blue", size = 3) +
   geom_line(color = "red") +
-  labs(x = "Probability of the Braves winning a head-to-head matchup",
+  labs(x = "Probability of the Braves winning a head-to-head match-up",
        y = "Pr('Win World Series')",
        title = "Probability of winning the world series") +
   theme_classic() +
@@ -67,22 +92,24 @@ ggplot(df, aes(x = probability, y=winning)) +
                 left = 0.5,
                 bottom = 0.6,
                 right = 0.95,
-                top = 0.75)
-``` 
+                top = 0.75) ## Inserting Braves logo
+```  
 
 3. Suppose one could change the World Series to be best-of-9 or some other best-of-X series. What is the shortest series length so that `P(Braves win World Series|P(B)=.55) ≥ 0.8`?
 
 ```{r}
+# Function for calculating P(Braves win World Series|P(B)=.55) ≥ 0.8 at different
+# probability values
 calc <- function(n, x) {
   vec <- c()
   for (i in 1:n) {
       r <- i
       k <- r-1
-      if (pnbinom(i-1, i, x) >= 0.8) {
-        vec[i] <- 2*i-1
-      }
-  }
-  vec <- vec[!is.na(vec)]
+      if (pnbinom(i-1, i, x) >= 0.8) { # for the Braves to win any world series,
+        vec[i] <- 2*i-1                # the maximum value for k is r - 1. Hence, we 
+      }                                # pnbinom(i-1, i, x) is used to calculate
+  }                                    # the probability that i wins occur before   
+  vec <- vec[!is.na(vec)]              # i losses
   names(vec) <- NULL
   return(vec[1])
 }
@@ -94,6 +121,8 @@ The shortest series length for `P(Braves win World Series|P(B)=.55) ≥ 0.8` to 
 4. What is the shortest series length so that `P(Braves win World Series|P(B)=0.55)≥0.8`? This will be a figure (see below) with PB on the x-axis and series length is the y-axis.
 
 ```{r}
+# This code chunk was used to vary the probability and see how long it would take
+# before P(Braves win World Series|P(B)=.55) ≥ 0.8 at different probability values.
 proba <- seq(0.51,1.0,0.01)
 rec <- c()
 i = 1
@@ -106,8 +135,11 @@ head(new_df)
 ```
 
 ```{r, fig.width=10, fig.height=7}
+# Creating a plot for the probability of Braves minimum series length required for
+# the braves >= 0.8 winning against the probability of the Braves winning a 
+# head-to-head match-up
 ggplot(new_df, aes(x = probability, y=stopping)) +
-  geom_point(color = "blue") +
+  geom_point(color = "blue", size = 3) +
   geom_line(color = "red") +
   labs(x = "Probability of the Braves winning a head-to-head matchup",
        y = "Series Length",
@@ -118,16 +150,38 @@ ggplot(new_df, aes(x = probability, y=stopping)) +
                 left = 0.5,
                 bottom = 0.6,
                 right = 0.95,
-                top = 0.75)
+                top = 0.75) ## Inserting Braves Logo
 ```
 
 5. Calculate `P(P(B)=0.55|Braves win World Series in 7 games)` under the assumption that either `P(B)=0.55` or `P(B)=0.45`. Explain your solution.
 
 ```{r}
-p_055 <- pnbinom(3,4,0.55)
-p_045 <- pnbinom(3,4,0.45)
-p_055_win7 <- (0.55*p_055)/(0.55*p_055+0.45*p_045)
+p_055 <- pnbinom(3,4,0.55) # P(Braves win World Series in 7 games | P(B)=0.55)
+p_045 <- pnbinom(3,4,0.45) # P(Braves win World Series in 7 games | P(B)=0.45)
+p_055_win7 <- (0.55*p_055)/(0.55*p_055+0.45*p_045) # P(P(B)=0.55 | Braves win World Series in 7 games)
 p_055_win7
 ```
 
+In order to arrive at the solution above, we first need to remember Bayes' Rule, 
+
+$$P(P(B)=0.55 | W) = (P(P(B) = 0.55)*P(W|P(B)=0.55)) \div P(W)$$
+W stands for Winning the World Series in 7 games. We already know `P(P(B)=0.55)` and `P(W|P(B)=0.55)`. Now we need to figure out `P(W)`. `P(W)` can be calculated as follows:
+
+$$P(W) = P(P(B)=0.55 |W)*P(W)) + P(P(B)=0.45 | W)*P(W))$$
+$$P(P(B)=0.55 | W) = (P(P(B) = 0.55)*P(W|P(B)=0.55)) \div P(W)$$
+$$P(P(B)=0.55 | W)*P(W) = (P(P(B) = 0.55)*P(W|P(B)=0.55))$$
+$$P(P(B)=0.55 | W)*P(W) = 0.55*0.6083= 0.3346$$
+This process is repeated for `P(Braves win World Series in 7 games | P(B)=0.45)`. So it can be expressed as:
+$$P(P(B)=0.45 | W) = (P(P(B) = 0.45)*P(W|P(B)=0.45)) \div P(W)$$
+$$P(P(B)=0.45 | W)*P(W) = (P(P(B) = 0.45)*P(W|P(B)=0.45))$$
+`pbinom(3,4,0.45)` was estimated to be 0.3917 so `P(W|P(B)=0.45))` is 0.3917
+$$P(P(B)=0.45 | W)*P(W) = 0.45*0.3917= 0.1763$$
+Hence, 
+$$P(W) = 0.3346 + 0.1763 = 0.5109$$
+Therefore,
+$$(P(B)=0.55 | W) = 0.3346\div 0.5109 = 0.6549 $$
+The probability that the Braves win given that `P(B)=0.55` is `r p_055_win7`
+
 # Conclusion
+
+The beauty of statistics lies in the fact that its concepts can be utilized in all walks of life. Deploying the philosophy of the negative binomial distribution in the sports of baseball is quite reminiscent of what Billy Beane did in Money Ball with respect to drafting players for Oakland A's. This was another great way to showcase the power of using the bayes' approach to estimate probability based on the condition of other events occuring.

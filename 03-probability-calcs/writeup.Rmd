@@ -48,7 +48,7 @@ The Probability that the Braves will win the World Series given that `P(B)= 0.55
 2. What is the probability that the Braves win the World Series given that `P(B)=x`? This will be a figure (see below) with PB on the x-axis and P(Braves win World Series) on the y-axis.
 
 ```{r}
-vec <- seq(0.5,1.0,0.01)
+vec <- seq(0.51,1.0,0.01)
 prob <- pnbinom(3,4, vec)
 df <- data.frame(probability = vec, winning = prob)
 head(df)

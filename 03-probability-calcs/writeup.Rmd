@@ -18,7 +18,15 @@ knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
 ```{r, include =FALSE}
 # Loading the tidyverse package
 library(tidyverse)
+#install.packages('magick')
+library(magick)
+#install.packages("patchwork")       # Install patchwork package
+library(patchwork) 
+#install.packages("png")             # Install png package
+library("png") 
+img_r <- readPNG("/cloud/project/03-probability-calcs/atlanta-braves-logo-font.png", native = TRUE)
 ```
+
 
 # Introduction
 
@@ -53,8 +61,13 @@ ggplot(df, aes(x = probability, y=winning)) +
   labs(x = "Probability of the Braves winning a head-to-head matchup",
        y = "Pr('Win World Series')",
        title = "Probability of winning the world series") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust=0.5))
+  theme_classic() +
+  theme(plot.title = element_text(hjust=0.5)) +
+  inset_element(p = img_r,
+                left = 0.5,
+                bottom = 0.6,
+                right = 0.95,
+                top = 0.75)
 ``` 
 
 3. Suppose one could change the World Series to be best-of-9 or some other best-of-X series. What is the shortest series length so that `P(Braves win World Series|P(B)=.55) ≥ 0.8`?
@@ -76,7 +89,7 @@ calc <- function(n, x) {
 calc(50, 0.55)
 ``` 
 
-The shortest series length for `P(Braves win World Series|P(B)=.55) ≥ 0.8` to occur is 36
+The shortest series length for `P(Braves win World Series|P(B)=.55) ≥ 0.8` to occur is `r calc(50,0.55)`
 
 4. What is the shortest series length so that `P(Braves win World Series|P(B)=0.55)≥0.8`? This will be a figure (see below) with PB on the x-axis and series length is the y-axis.
 
@@ -99,8 +112,13 @@ ggplot(new_df, aes(x = probability, y=stopping)) +
   labs(x = "Probability of the Braves winning a head-to-head matchup",
        y = "Series Length",
        title = "Shortest series so that P (Win WS given p) >= 0.8") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust=0.5))
+  theme_classic() +
+  theme(plot.title = element_text(hjust=0.5)) +
+  inset_element(p = img_r,
+                left = 0.5,
+                bottom = 0.6,
+                right = 0.95,
+                top = 0.75)
 ```
 
 5. Calculate `P(P(B)=0.55|Braves win World Series in 7 games)` under the assumption that either `P(B)=0.55` or `P(B)=0.45`. Explain your solution.

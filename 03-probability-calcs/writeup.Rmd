@@ -68,7 +68,7 @@ p_055
 The Probability that the Braves will win the World Series given that `P(B)= 0.55` is 
 `r p_055`
 
-2. What is the probability that the Braves win the World Series given that `P(B)=x`? This will be a figure (see below) with PB on the x-axis and P(Braves win World Series) on the y-axis.
+2. What is the probability that the Braves win the World Series given that `P(B)=x`? This will be a figure (see below) with `P(B)` on the x-axis and `P(Braves win World Series)` on the y-axis.
 
 ```{r}
 vec <- seq(0.51,1.0,0.01) # creating a vector of numbers from 0.51 to 1
@@ -118,7 +118,7 @@ calc(50, 0.55)
 
 The shortest series length for `P(Braves win World Series|P(B)=.55) ≥ 0.8` to occur is `r calc(50,0.55)`
 
-4. What is the shortest series length so that `P(Braves win World Series|P(B)=0.55)≥0.8`? This will be a figure (see below) with PB on the x-axis and series length is the y-axis.
+4. What is the shortest series length so that `P(Braves win World Series|P(B)=0.55)≥0.8`? This will be a figure (see below) with `P(B)` on the x-axis and series length is the y-axis.
 
 ```{r}
 # This code chunk was used to vary the probability and see how long it would take

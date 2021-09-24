@@ -281,7 +281,7 @@ p_055</code></pre>
 # The pnbinom function uses these three values above to calculate all the probability that r wins before k + 1 losses. p stands for the probability of winning.</code></pre>
 <p>The Probability that the Braves will win the World Series given that <code>P(B)= 0.55</code> is 0.6082878</p>
 <ol start="2" style="list-style-type: decimal">
-<li>What is the probability that the Braves win the World Series given that <code>P(B)=x</code>? This will be a figure (see below) with PB on the x-axis and P(Braves win World Series) on the y-axis.</li>
+<li>What is the probability that the Braves win the World Series given that <code>P(B)=x</code>? This will be a figure (see below) with <code>P(B)</code> on the x-axis and <code>P(Braves win World Series)</code> on the y-axis.</li>
 </ol>
 <pre class="r"><code>vec &lt;- seq(0.51,1.0,0.01) # creating a vector of numbers from 0.51 to 1
 prob &lt;- pnbinom(3,4, vec) # varying the value of p to obtain different probability values of the Braves winning
@@ -332,7 +332,7 @@ calc(50, 0.55)</code></pre>
 <pre><code>## [1] 71</code></pre>
 <p>The shortest series length for <code>P(Braves win World Series|P(B)=.55) ≥ 0.8</code> to occur is 71</p>
 <ol start="4" style="list-style-type: decimal">
-<li>What is the shortest series length so that <code>P(Braves win World Series|P(B)=0.55)≥0.8</code>? This will be a figure (see below) with PB on the x-axis and series length is the y-axis.</li>
+<li>What is the shortest series length so that <code>P(Braves win World Series|P(B)=0.55)≥0.8</code>? This will be a figure (see below) with <code>P(B)</code> on the x-axis and series length is the y-axis.</li>
 </ol>
 <pre class="r"><code># This code chunk was used to vary the probability and see how long it would take
 # before P(Braves win World Series|P(B)=.55) ≥ 0.8 at different probability values.

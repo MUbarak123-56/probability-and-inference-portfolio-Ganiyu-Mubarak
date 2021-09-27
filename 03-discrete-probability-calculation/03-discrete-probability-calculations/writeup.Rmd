@@ -24,7 +24,7 @@ library(magick)
 library(patchwork) 
 #install.packages("png")             # Install png package
 library("png") 
-img_r <- readPNG("/cloud/project/03-probability-calcs/atlanta-braves-logo-font.png", native = TRUE)
+img_r <- readPNG("~/probability-and-inference-portfolio-Ganiyu-Mubarak/03-discrete-probability-calculations/atlanta-braves-logo-font.png", native = TRUE)
 ```
 
 
@@ -156,31 +156,26 @@ ggplot(new_df, aes(x = probability, y=stopping)) +
 5. Calculate `P(P(B)=0.55|Braves win World Series in 7 games)` under the assumption that either `P(B)=0.55` or `P(B)=0.45`. Explain your solution.
 
 ```{r}
-p_055 <- pnbinom(3,4,0.55) # P(Braves win World Series in 7 games | P(B)=0.55)
-p_045 <- pnbinom(3,4,0.45) # P(Braves win World Series in 7 games | P(B)=0.45)
-p_055_win7 <- (0.55*p_055)/(0.55*p_055+0.45*p_045) # P(P(B)=0.55 | Braves win World Series in 7 games)
+p_055 <- dnbinom(3,4,0.55) 
+p_045 <- dnbinom(3,4,0.45)
+p_055_win7 <- p_055/(p_055+p_045)# P(P(B)=0.55 | Braves win World Series in 7 games)
 p_055_win7
 ```
 
 In order to arrive at the solution above, we first need to remember Bayes' Rule, 
 
 $$P(P(B)=0.55 | W) = (P(P(B) = 0.55)*P(W|P(B)=0.55)) \div P(W)$$
-W stands for Winning the World Series in 7 games. We already know `P(P(B)=0.55)` and `P(W|P(B)=0.55)`. Now we need to figure out `P(W)`. `P(W)` can be calculated as follows:
+W stands for The braves winning the World Series in 7 games. We need to figure out `P(P(B) = 0.55)*P(W|P(B)=0.55))` and `P(W)`
 
-$$P(W) = P(P(B)=0.55 |W)*P(W)) + P(P(B)=0.45 | W)*P(W))$$
-$$P(P(B)=0.55 | W) = (P(P(B) = 0.55)*P(W|P(B)=0.55)) \div P(W)$$
-$$P(P(B)=0.55 | W)*P(W) = (P(P(B) = 0.55)*P(W|P(B)=0.55))$$
-$$P(P(B)=0.55 | W)*P(W) = 0.55*0.6083= 0.3346$$
-This process is repeated for `P(Braves win World Series in 7 games | P(B)=0.45)`. So it can be expressed as:
-$$P(P(B)=0.45 | W) = (P(P(B) = 0.45)*P(W|P(B)=0.45)) \div P(W)$$
-$$P(P(B)=0.45 | W)*P(W) = (P(P(B) = 0.45)*P(W|P(B)=0.45))$$
-`pbinom(3,4,0.45)` was estimated to be 0.3917 so `P(W|P(B)=0.45))` is 0.3917
-$$P(P(B)=0.45 | W)*P(W) = 0.45*0.3917= 0.1763$$
-Hence, 
-$$P(W) = 0.3346 + 0.1763 = 0.5109$$
+$$P(W)=P(P(B)=0.55|W)∗P(W))+P(P(B)=0.45|W)∗P(W))$$
+$$P(P(B) = 0.55)*P(W|P(B)=0.55))  = {6 \choose 3}*(0.55)^4*(0.45)^3 = 0.1667$$
+$$P(P(B) = 0.55)*P(W|P(B)=0.55))  = {6 \choose 3}*(0.45)^4*(0.55)^3 = 0.1365$$
+
+$$P(W) = 0.1667 + 0.1365 = 0.3032$$
 Therefore,
-$$(P(B)=0.55 | W) = 0.3346\div 0.5109 = 0.6549 $$
-The probability that the Braves win given that `P(B)=0.55` is `r p_055_win7`
+$$P(P(B)=0.55 | W) = 0.1667 \div 0.3032 = 0.549 == 0.55 $$
+
+The `P(B)=0.55` given that the braves win in 7 games is `r p_055_win7`
 
 # Conclusion
 

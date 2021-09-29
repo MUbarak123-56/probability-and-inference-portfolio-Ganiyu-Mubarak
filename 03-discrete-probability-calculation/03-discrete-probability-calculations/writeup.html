@@ -11,7 +11,7 @@
 
 <meta name="author" content="Mubarak Ganiyu" />
 
-<meta name="date" content="2021-09-27" />
+<meta name="date" content="2021-09-29" />
 
 <title>How often does the better team win the World Series?</title>
 
@@ -1545,7 +1545,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">How often does the better team win the World Series?</h1>
 <h4 class="author">Mubarak Ganiyu</h4>
-<h4 class="date">September 27, 2021</h4>
+<h4 class="date">September 29, 2021</h4>
 
 </div>
 
@@ -1681,7 +1681,7 @@ p_055_win7</code></pre>
 <pre><code>## [1] 0.55</code></pre>
 <p>In order to arrive at the solution above, we first need to remember Bayes’ Rule,</p>
 <p><span class="math display">\[P(P(B)=0.55 | W) = (P(P(B) = 0.55)*P(W|P(B)=0.55)) \div P(W)\]</span> W stands for The braves winning the World Series in 7 games. We need to figure out <code>P(P(B) = 0.55)*P(W|P(B)=0.55))</code> and <code>P(W)</code></p>
-<p><span class="math display">\[P(W)=P(P(B)=0.55|W)∗P(W))+P(P(B)=0.45|W)∗P(W))\]</span> <span class="math display">\[P(P(B) = 0.55)*P(W|P(B)=0.55))  = {6 \choose 3}*(0.55)^4*(0.45)^3 = 0.1667\]</span> <span class="math display">\[P(P(B) = 0.55)*P(W|P(B)=0.55))  = {6 \choose 3}*(0.45)^4*(0.55)^3 = 0.1365\]</span></p>
+<p><span class="math display">\[P(W)=P(P(B)=0.55|W)∗P(W))+P(P(B)=0.45|W)∗P(W))\]</span> <span class="math display">\[P(P(B) = 0.55)*P(W|P(B)=0.55))  = {6 \choose 3}*(0.55)^4*(0.45)^3 = 0.1667\]</span> <span class="math display">\[P(P(B) = 0.45)*P(W|P(B)=0.45))  = {6 \choose 3}*(0.45)^4*(0.55)^3 = 0.1365\]</span></p>
 <p><span class="math display">\[P(W) = 0.1667 + 0.1365 = 0.3032\]</span> Therefore, <span class="math display">\[P(P(B)=0.55 | W) = 0.1667 \div 0.3032 = 0.549 == 0.55 \]</span></p>
 <p>The <code>P(B)=0.55</code> given that the braves win in 7 games is 0.55</p>
 </div>

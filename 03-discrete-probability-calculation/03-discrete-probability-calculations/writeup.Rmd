@@ -169,7 +169,7 @@ W stands for The braves winning the World Series in 7 games. We need to figure o
 
 $$P(W)=P(P(B)=0.55|W)∗P(W))+P(P(B)=0.45|W)∗P(W))$$
 $$P(P(B) = 0.55)*P(W|P(B)=0.55))  = {6 \choose 3}*(0.55)^4*(0.45)^3 = 0.1667$$
-$$P(P(B) = 0.55)*P(W|P(B)=0.55))  = {6 \choose 3}*(0.45)^4*(0.55)^3 = 0.1365$$
+$$P(P(B) = 0.45)*P(W|P(B)=0.45))  = {6 \choose 3}*(0.45)^4*(0.55)^3 = 0.1365$$
 
 $$P(W) = 0.1667 + 0.1365 = 0.3032$$
 Therefore,

@@ -35,17 +35,17 @@ require(dplyr)
 #install.packages("data.table")
 require(data.table)
 # Get all possible outcomes
-calc <- function(vec, adv) {
+calc <- function(vec, adv, p) {
   apo <- fread("https://raw.githubusercontent.com/thomasgstewart/data-science-5620-fall-2021/master/deliverables/assets/all-possible-world-series-outcomes.csv")
 
   # Home field indicator
   hfi <- vec #{ATL, ATL, NYC, NYC, NYC, ATL, ATL}
 
   # P_B
-  pb <- 0.55
+  pb <- p
   advantage_multiplier <- adv # Set = 1 for no advantage
-  pbh <- 0.55*advantage_multiplier
-  pba <- 1 - (1 - 0.55)*advantage_multiplier
+  pbh <- p*advantage_multiplier
+  pba <- 1 - (1 - p)*advantage_multiplier
 
   # Calculate the probability of each possible outcome
   apo[, p := NA_real_] # Initialize new column in apo to store prob
@@ -62,12 +62,12 @@ calc <- function(vec, adv) {
     apo[i, p := prod(prob_game)] # Data.table syntax
     }
   # Sanity check: does sum(p) == 1?
-  apo[, sum(p)] # This is data.table notation
+  #apo[, sum(p)] # This is data.table notation
 
   # Probability of overall World Series outcomes
-  apo[, sum(p), overall_outcome]
+  as.double(apo[, sum(p), overall_outcome][1,2])
 }
-calc(c(1,1,0,0,0,1,1), 1.1)
+calc(c(1,1,0,0,0,1,1), 1.1, 0.55)
 ```
 
 # Questions & Answers
@@ -77,45 +77,111 @@ calc(c(1,1,0,0,0,1,1), 1.1)
 **Home advantage effect**
 
 ```{r}
-calc(c(0,0,1,1,1,0,0), 1.1)
+ha <- calc(c(0,0,1,1,1,0,0), 1.1, 0.55)
+ha
 ```
 
 **No home advantage**
 
 ```{r}
-calc(c(0,0,1,1,1,0,0), 1)
+n_ha <- calc(c(0,0,1,1,1,0,0), 1, 0.55)
+n_ha
 ```
 
 2. Calculate the same probabilities as the previous question by simulation.
 
 ```{r}
+set.seed(0)
 p_b <- 0.55
 p_ba <- 1 - (1-p_b)*1.1
-rbinom(7,1, p_b)
-rbinom(7,1, p_ba)
+p_br <- rbinom(1000,7, p_b) 
+p_bar <- rbinom(1000,7, p_ba)
+calc_prob <- function(p) {
+  count <- 0
+  for (i in p) {
+    if (i >= 4) {
+      count = count + 1
+    }
+  }
+  count
+}
+prob_b <- calc_prob(p_br)/length(p_br)
+prob_ba <- calc_prob(p_bar)/length(p_bar)
+prob_b
+prob_ba
 ```
 
 
 3. What is the absolute and relative error for your simulation in the previous question?
 
 ```{r}
-
+abs_p_br <- abs(prob_b - n_ha)
+rel_p_br <- abs(prob_b - n_ha)/n_ha
+abs_p_ba <- abs(prob_ba - ha)
+rel_p_ba <- abs(prob_ba - ha)/ha
+abs_p_br
+rel_p_br
+abs_p_ba
+rel_p_ba
 ```
 
 
 4. Does the difference in probabilities (with vs without home field advantage) depend on P(B)? (Generate a plot to answer this question.)
 
 ```{r}
+vec <- seq(0.51,1,0.01)
+pha <- c()
+pnha <- c()
+count <- 1
+for (i in vec) {
+  pha[count] <- calc(c(0,0,1,1,1,0,0), 1.1, i)
+  pnha[count] <- calc(c(0,0,1,1,1,0,0), 1, i)
+  count = count + 1
+}
+new_df <- data.frame(prob = vec, yes = pha, no = pnha)
+new_df <- new_df %>% 
+  mutate(diff = yes - no)
+head(new_df)
+```
+**Plot**
 
+```{r, fig.width = 10, fig.height = 7}
+ggplot(new_df) +
+  geom_point(aes(prob, diff), color = "blue") +
+  theme_classic()
 ```
 
+```{r}
+p_b <- 0.55
+p_ba <- 1 - (1-p_b)*1.1
+p_br <- sample(rbinom(7,1,p_b), 1000, replace = TRUE)
+p_bar <- sample(rbinom(7,1,p_ba), 1000, replace = TRUE)
+```
 
 5. Does the difference in probabilities (with vs without home field advantage) depend on the advantage factor? (The advantage factor in PBH and PBA is the 1.1 multiplier that results in a 10% increase for the home team. Generate a plot to answer this question.)
 
 ```{r}
-
+vec <- seq(0.1,3,0.01)
+adv <- c()
+nadv <- c()
+count <- 1
+for (i in vec) {
+  adv[count] <- calc(c(0,0,1,1,1,0,0), i, 0.55)
+  count = count + 1
+}
+new_df2 <- data.frame(prob = vec, yes = adv, no = calc(c(0,0,1,1,1,0,0), 1, 0.55))
+new_df2 <- new_df2 %>% 
+  mutate(diff = yes - no)
+head(new_df2)
 ```
 
+**Plot**
+
+```{r, fig.height=7, fig.width=10} 
+ggplot(new_df2) +
+  geom_point(aes(prob, diff), color = "blue") +
+  theme_classic()
+```
 
 # Conclusion
 

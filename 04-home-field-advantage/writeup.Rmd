@@ -34,9 +34,15 @@ $$P(B)=0.55$$
 `pbh` is the probability that the Braves have a home advantage if the games was to be played in ATL. It is calculated as 
 $$P(B)_h = P(B)*advantage$$
 
+<<<<<<< HEAD
 `pba` is the probability that the Braves win if the game was to be played in NYC. It is calculated as 
 $$P(B)_a = 1 - (1 - P(B))*advantage$$
 advantage stands for advantage multiplier. It has been set as 1.1 for cases in which home advantage exists and 1 if there is no home advantage. A data set with all the possible combinations is also loaded into the function with each row representing each combination. Based on the combination of each row, the probabilities are multiplied. Then, all the probabilities are added up. If the summation of the probabilities is 1, then the sequences in which the Braves win are added together and outputted.
+=======
+`pba` is the probability that the Braves win if the game was to be played in the order NYC. It is calculated as 
+$$P(B)_a = 1 - (1 - P(B))*advantage$$
+advantage stands for advantage multiplier. It has been set as 1.1 for cases in which home advantage exists and 1 if there is no home advantage.
+>>>>>>> d5c9f01427c8354053ce2d351d2e0425683b6216
 
 ```{r, warning = FALSE}
 require(dplyr)
@@ -113,7 +119,7 @@ calc2 <- function(adv) {
       # Our probability vector is c(pba,pba,pbh,pbh,pbh,pba,pba)
       # because the order is {ATL, ATL, NYC, NYC, NYC, ATL, ATL}
       for (j in 1:7) {
-        d[i,j] <- n[j] # appending the cells with outcome of the game. 1 stands for W 
+        d[i,j] <- n[j] # appending the cells with outcome of the game. 1 stands for W
       }                # and 0 stands for L
   }
   d <- d %>% 
@@ -184,7 +190,6 @@ According to the plot, it cannot be clearly inferred if `P(B)` has a huge impact
 ```{r}
 vec <- seq(0.1,3,0.05)
 adv <- c()
-nadv <- c()
 count <- 1
 for (i in vec) {
   adv[count] <- calc(c(0,0,1,1,1,0,0), i, 0.55) # probability w/ different 

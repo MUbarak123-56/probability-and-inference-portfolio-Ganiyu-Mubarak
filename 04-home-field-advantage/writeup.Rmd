@@ -16,6 +16,11 @@ knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
 
 ```{r, include = FALSE}
 library(tidyverse)
+#install.packages("patchwork")       # Install patchwork package
+library(patchwork) 
+#install.packages("png")             # Install png package
+library("png") 
+img_r <- readPNG("/cloud/project/04-home-field-advantage/atlanta-braves-logo-font.png", native = TRUE)
 ```
 
 # Introduction
@@ -24,11 +29,14 @@ In team sports, there has always been a discussion of how home advantage often g
 
 # Method
 
-The method used for estimating the impact of home advantage can be seen in the code chunk below. It has three different probability values for gauging the impact of home advantage. `pb` is used to showcase the non-existence of home field advantage. It is estimated to be 0.55 as shown below:$$P(B)=0.55$$
-`pbh` is the probability that the Braves have a home advantage if the games was to be played in ATL. It is calculated as $$P(B)_h = P(B)*advantage$$
+The method used for estimating the impact of home advantage can be seen in the code chunk below. It has three different probability values for gauging the impact of home advantage. `pb` is used to showcase the non-existence of home field advantage. It is estimated to be 0.55 as shown below:
+$$P(B)=0.55$$
+`pbh` is the probability that the Braves have a home advantage if the games was to be played in ATL. It is calculated as 
+$$P(B)_h = P(B)*advantage$$
 
-`pba` is the probability that the Braves win if the game was to be played in the order NYC. It is calculated as $$P(B)_a = 1 - (1 - P(B))*advantage$$
-advantage stands for advantage multiplier. It has been set as 1.1 for cases in which home advantage exists and 1 if there is no home advantage.
+`pba` is the probability that the Braves win if the game was to be played in NYC. It is calculated as 
+$$P(B)_a = 1 - (1 - P(B))*advantage$$
+advantage stands for advantage multiplier. It has been set as 1.1 for cases in which home advantage exists and 1 if there is no home advantage. A data set with all the possible combinations is also loaded into the function with each row representing each combination. Based on the combination of each row, the probabilities are multiplied. Then, all the probabilities are added up. If the summation of the probabilities is 1, then the sequences in which the Braves win are added together and outputted.
 
 ```{r, warning = FALSE}
 require(dplyr)
@@ -62,10 +70,10 @@ calc <- function(vec, adv, p) {
     apo[i, p := prod(prob_game)] # Data.table syntax
     }
   # Sanity check: does sum(p) == 1?
-  #apo[, sum(p)] # This is data.table notation
-
-  # Probability of overall World Series outcomes
-  as.double(apo[, sum(p), overall_outcome][1,2])
+  if (all.equal(apo[, sum(p)],1)) { # This is data.table notation
+     return(as.double(apo[, sum(p), overall_outcome][1,2])) 
+    # Probability of overall World Series outcomes
+  }
 }
 calc(c(1,1,0,0,0,1,1), 1.1, 0.55)
 ```
@@ -77,40 +85,49 @@ calc(c(1,1,0,0,0,1,1), 1.1, 0.55)
 **Home advantage effect**
 
 ```{r}
-ha <- calc(c(0,0,1,1,1,0,0), 1.1, 0.55)
-ha
+ha <- calc(c(0,0,1,1,1,0,0), 1.1, 0.55) # chances of winning with home advantage
 ```
+
+The probability that the Braves will win without home advantage is `r ha`.
 
 **No home advantage**
 
 ```{r}
-n_ha <- calc(c(0,0,1,1,1,0,0), 1, 0.55)
-n_ha
+n_ha <- calc(c(0,0,1,1,1,0,0), 1, 0.55) # chances of winning without home advantage
 ```
+The probability that the Braves will win without home advantage is `r n_ha`.
 
 2. Calculate the same probabilities as the previous question by simulation.
 
 ```{r}
-set.seed(0)
-p_b <- 0.55
-p_ba <- 1 - (1-p_b)*1.1
-p_br <- rbinom(1000,7, p_b) 
-p_bar <- rbinom(1000,7, p_ba)
-calc_prob <- function(p) {
-  count <- 0
-  for (i in p) {
-    if (i >= 4) {
-      count = count + 1
-    }
+# Function for running simulation, it's parameter is the advantage multiplier
+calc2 <- function(adv) {
+  pb <- 0.55
+  advantage_multiplier <- adv
+  pbh <- pb*advantage_multiplier
+  pba <- 1 - (1 - pb)*advantage_multiplier
+  d <- data.frame()
+  set.seed(0)
+  for (i in 1:5000) {
+      n <- rbinom(7,1, c(pba,pba,pbh,pbh,pbh,pba,pba))
+      # Our probability vector is c(pba,pba,pbh,pbh,pbh,pba,pba)
+      # because the order is {ATL, ATL, NYC, NYC, NYC, ATL, ATL}
+      for (j in 1:7) {
+        d[i,j] <- n[j] # appending the cells with outcome of the game. 1 stands for W 
+      }                # and 0 stands for L
   }
-  count
+  d <- d %>% 
+    mutate(count = V1+V2+V3+V4+V5+V6+V7) %>% 
+    mutate(win = if_else(count >= 4, "W", "L")) # selecting cases in which the Braves win
+  d_win <- d %>% 
+    filter(win == "W")
+  return(nrow(d_win)/nrow(d))
 }
-prob_b <- calc_prob(p_br)/length(p_br)
-prob_ba <- calc_prob(p_bar)/length(p_bar)
-prob_b
-prob_ba
+prob_b <- calc2(1) # Probability without home advantage
+prob_ba <- calc2(1.1) # Probability with home advantage
 ```
 
+The simulted probability that the Braves will win without home advantage is `r prob_b`. The simulted probability that the Braves will win with home advantage is `r prob_ba`.
 
 3. What is the absolute and relative error for your simulation in the previous question?
 
@@ -119,57 +136,61 @@ abs_p_br <- abs(prob_b - n_ha)
 rel_p_br <- abs(prob_b - n_ha)/n_ha
 abs_p_ba <- abs(prob_ba - ha)
 rel_p_ba <- abs(prob_ba - ha)/ha
-abs_p_br
-rel_p_br
-abs_p_ba
-rel_p_ba
 ```
+Absolute error for the case without home advantage is `r abs_p_br`. Relative error is `r rel_p_br`. 
 
+Absolute error for the case with home advantage is `r abs_p_ba`. Relative error is `r rel_p_ba`. 
 
 4. Does the difference in probabilities (with vs without home field advantage) depend on P(B)? (Generate a plot to answer this question.)
 
 ```{r}
 vec <- seq(0.51,1,0.01)
-pha <- c()
-pnha <- c()
+pha <- c() # probability w/ home advantage
+pnha <- c() # probability w/o home advantage
 count <- 1
 for (i in vec) {
   pha[count] <- calc(c(0,0,1,1,1,0,0), 1.1, i)
   pnha[count] <- calc(c(0,0,1,1,1,0,0), 1, i)
-  count = count + 1
+  count <- count + 1
 }
-new_df <- data.frame(prob = vec, yes = pha, no = pnha)
-new_df <- new_df %>% 
-  mutate(diff = yes - no)
-head(new_df)
+new_df <- data.frame(prob = vec, yes = pha, no = pnha) # creating a data frame with
+new_df <- new_df %>%                                   # the probabilities and the
+  mutate(diff = yes - no)                              # outcomes of the impacts of
+head(new_df)                                           # home advantage
 ```
+
 **Plot**
 
 ```{r, fig.width = 10, fig.height = 7}
 ggplot(new_df) +
   geom_point(aes(prob, diff), color = "blue") +
-  theme_classic()
+  geom_line(aes(prob, diff), color = "red") +
+  labs(title="The impact of P(B) on the home advantage results",
+       x = "Probability",
+       y = "Difference in the probability of winning") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust=0.5)) +
+  inset_element(p = img_r,
+                left = 0.6,
+                bottom = 0.5,
+                right = 0.4,
+                top = 0.65)
 ```
 
-```{r}
-p_b <- 0.55
-p_ba <- 1 - (1-p_b)*1.1
-p_br <- sample(rbinom(7,1,p_b), 1000, replace = TRUE)
-p_bar <- sample(rbinom(7,1,p_ba), 1000, replace = TRUE)
-```
+According to the plot, it cannot be clearly inferred if `P(B)` has a huge impact on the difference in probabilities, given that the range of difference in probabilities is quite low.
 
 5. Does the difference in probabilities (with vs without home field advantage) depend on the advantage factor? (The advantage factor in PBH and PBA is the 1.1 multiplier that results in a 10% increase for the home team. Generate a plot to answer this question.)
 
 ```{r}
-vec <- seq(0.1,3,0.01)
+vec <- seq(0.1,3,0.05)
 adv <- c()
 nadv <- c()
 count <- 1
 for (i in vec) {
-  adv[count] <- calc(c(0,0,1,1,1,0,0), i, 0.55)
-  count = count + 1
-}
-new_df2 <- data.frame(prob = vec, yes = adv, no = calc(c(0,0,1,1,1,0,0), 1, 0.55))
+  adv[count] <- calc(c(0,0,1,1,1,0,0), i, 0.55) # probability w/ different 
+  count <- count + 1                             # advantage multipliers
+}   
+new_df2 <- data.frame(adv_mult = vec, yes = adv, no = calc(c(0,0,1,1,1,0,0), 1, 0.55))
 new_df2 <- new_df2 %>% 
   mutate(diff = yes - no)
 head(new_df2)
@@ -179,9 +200,22 @@ head(new_df2)
 
 ```{r, fig.height=7, fig.width=10} 
 ggplot(new_df2) +
-  geom_point(aes(prob, diff), color = "blue") +
-  theme_classic()
+  geom_point(aes(adv_mult, diff), color = "blue", size=2) +
+  geom_line(aes(adv_mult, diff), color = "red") +
+  labs(title="The impact of advantage multiplier on the home advantage results",
+       x = "Advantage Multiplier",
+       y = "Difference in the probability of winning") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust=0.5)) +
+  inset_element(p = img_r,
+                left = 0.5,
+                bottom = 0.6,
+                right = 0.75,
+                top = 0.75)
 ```
+
+According to the plot, it can be observed that advantage multiplier has a huge impact on the difference in probabilities, given that the size of the advantage multiplier defines the magnitude of the difference. One can clearly observe that increasing the multiplier from 1 to 3 results results in the magnitude of the difference increasing by more than 3 times. Therefore, there is a non-linear relationship.
 
 # Conclusion
 
+This deliverable showcases another way in which statistical concepts can be used to estimate how home advantage has an impact on a sports' team performance. In this case, we are interested in measuring the ability of the Braves winning the World Series based on 

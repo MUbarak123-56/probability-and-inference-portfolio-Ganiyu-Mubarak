@@ -31,18 +31,14 @@ In team sports, there has always been a discussion of how home advantage often g
 
 The method used for estimating the impact of home advantage can be seen in the code chunk below. It has three different probability values for gauging the impact of home advantage. `pb` is used to showcase the non-existence of home field advantage. It is estimated to be 0.55 as shown below:
 $$P(B)=0.55$$
+
 `pbh` is the probability that the Braves have a home advantage if the games was to be played in ATL. It is calculated as 
 $$P(B)_h = P(B)*advantage$$
 
-<<<<<<< HEAD
 `pba` is the probability that the Braves win if the game was to be played in NYC. It is calculated as 
 $$P(B)_a = 1 - (1 - P(B))*advantage$$
+
 advantage stands for advantage multiplier. It has been set as 1.1 for cases in which home advantage exists and 1 if there is no home advantage. A data set with all the possible combinations is also loaded into the function with each row representing each combination. Based on the combination of each row, the probabilities are multiplied. Then, all the probabilities are added up. If the summation of the probabilities is 1, then the sequences in which the Braves win are added together and outputted.
-=======
-`pba` is the probability that the Braves win if the game was to be played in the order NYC. It is calculated as 
-$$P(B)_a = 1 - (1 - P(B))*advantage$$
-advantage stands for advantage multiplier. It has been set as 1.1 for cases in which home advantage exists and 1 if there is no home advantage.
->>>>>>> d5c9f01427c8354053ce2d351d2e0425683b6216
 
 ```{r, warning = FALSE}
 require(dplyr)

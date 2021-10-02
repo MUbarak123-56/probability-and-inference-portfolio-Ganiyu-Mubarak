@@ -20,7 +20,7 @@ library(tidyverse)
 library(patchwork) 
 #install.packages("png")             # Install png package
 library("png") 
-img_r <- readPNG("/cloud/project/04-home-field-advantage/atlanta-braves-logo-font.png", native = TRUE)
+img_r <- readPNG("~/probability-and-inference-portfolio-Ganiyu-Mubarak/04-home-field-advantage/atlanta-braves-logo-font.png", native = TRUE)
 ```
 
 # Introduction
@@ -97,7 +97,10 @@ The probability that the Braves will win without home advantage is `r ha`.
 ```{r}
 n_ha <- calc(c(0,0,1,1,1,0,0), 1, 0.55) # chances of winning without home advantage
 ```
+
 The probability that the Braves will win without home advantage is `r n_ha`.
+
+The difference in probabilities is `r abs(n_ha-ha)`
 
 2. Calculate the same probabilities as the previous question by simulation.
 
@@ -170,7 +173,7 @@ ggplot(new_df) +
   labs(title="The impact of P(B) on the home advantage results",
        x = "Probability",
        y = "Difference in the probability of winning") +
-  theme_bw() +
+  theme_classic() +
   theme(plot.title = element_text(hjust=0.5)) +
   inset_element(p = img_r,
                 left = 0.6,
@@ -206,7 +209,7 @@ ggplot(new_df2) +
   labs(title="The impact of advantage multiplier on the home advantage results",
        x = "Advantage Multiplier",
        y = "Difference in the probability of winning") +
-  theme_bw() +
+  theme_classic() +
   theme(plot.title = element_text(hjust=0.5)) +
   inset_element(p = img_r,
                 left = 0.5,
@@ -219,4 +222,4 @@ According to the plot, it can be observed that advantage multiplier has a huge i
 
 # Conclusion
 
-This deliverable showcases another way in which statistical concepts can be used to estimate how home advantage has an impact on a sports' team performance. In this case, we are interested in measuring the ability of the Braves winning the World Series based on 
+This deliverable showcases another way in which statistical concepts can be used to estimate how home advantage has an impact on a sports' team performance. In this case, we are interested in measuring the ability of the Braves winning the World Series based on utilizing a parameter called advantage multiplier. The advantage multiplier served as a means to gauge their chances of winning.

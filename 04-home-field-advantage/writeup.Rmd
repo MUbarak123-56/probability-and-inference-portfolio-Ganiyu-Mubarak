@@ -182,7 +182,7 @@ ggplot(new_df) +
                 top = 0.65)
 ```
 
-According to the plot, it cannot be clearly inferred if `P(B)` has a huge impact on the difference in probabilities, given that the range of difference in probabilities is quite low.
+According to the plot, it cannot be clearly inferred if `P(B)` has a huge impact on the difference in probabilities, given that the range of difference in probabilities is quite low. However, most of the differences in probabilities when `P(B)` > 0.57 were positive.
 
 5. Does the difference in probabilities (with vs without home field advantage) depend on the advantage factor? (The advantage factor in PBH and PBA is the 1.1 multiplier that results in a 10% increase for the home team. Generate a plot to answer this question.)
 
@@ -218,7 +218,7 @@ ggplot(new_df2) +
                 top = 0.75)
 ```
 
-According to the plot, it can be observed that advantage multiplier has a huge impact on the difference in probabilities, given that the size of the advantage multiplier defines the magnitude of the difference. One can clearly observe that increasing the multiplier from 1 to 3 results results in the magnitude of the difference increasing by more than 3 times. Therefore, there is a non-linear relationship.
+According to the plot, it can be observed that advantage multiplier has a huge impact on the difference in probabilities, given that the size of the advantage multiplier defines the magnitude of the difference. One can clearly observe that increasing the multiplier from 1 to 3 results results in the magnitude of the difference increasing by more than 3 times. Therefore, there is a non-linear relationship between differences in probability and advantage multiplier.
 
 # Conclusion
 

@@ -1,5 +1,5 @@
 ---
-title: "The Impact of Home Advantage on winning the World Series"
+title: "Logartithmic Transformation"
 author: "Mubarak Ganiyu"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
@@ -13,3 +13,213 @@ output:
 ```{r global options, include = FALSE}
 knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
 ```
+
+```{r, include = FALSE}
+library(tidyverse)
+```
+
+# Introduction
+
+# Method
+
+```{r}
+pdf <- function(df, type, var) {
+  ggplot(df) +
+    geom_density(aes(x = type), fill = "grey") +
+    geom_vline(aes(xintercept = mean(type)), color = "blue") +
+    geom_vline(aes(xintercept = median(type)), color = "red") +
+    labs(title = sprintf("Probability density function of %s",var),
+         subtitle = "Blue represents mean, red represents median",
+         x = "value") +
+    theme_bw() +
+    theme(plot.title = element_text(hjust=0.5),
+          plot.subtitle = element_text(hjust=0.5))
+}
+
+cdf <- function(df, type, var) {
+    ggplot(df, aes(type)) + 
+    stat_ecdf(geom = "step", color = "black") +
+    geom_vline(aes(xintercept = mean(type)), color = "blue") +
+    geom_vline(aes(xintercept = median(type)), color = "red") +
+    labs(title = sprintf("Cumulative distribution function of %s", var),
+         subtitle = "Blue represents mean, red represents median",
+         x = "value",
+         y = "percentile") +
+    theme_bw() +
+    theme(plot.title = element_text(hjust=0.5),
+          plot.subtitle = element_text(hjust=0.5))
+}
+
+arith_vs_geom <- function(d, var) {
+  ggplot(d) +
+    geom_point(aes(x = arithmetic, y = geometric), color = "blue") +
+    geom_smooth(aes(x = arithmetic, y = geometric), method = "lm",
+                color = "black", se = FALSE) +
+    labs(title=sprintf("Geometric vs Arithmetic mean for %s", var),
+         x = "Arithmetic mean",
+         y = "Geometric mean") +
+    theme_bw() +
+    theme(plot.title = element_text(hjust=0.5),
+          plot.subtitle = element_text(hjust=0.5))
+}
+
+hist_plot <- function(d, var, n) {
+  ggplot(d) +
+    geom_histogram(aes(x = arithmetic), binwidth=n,fill= "blue",alpha =0.4) +
+    geom_histogram(aes(x = geometric), binwidth=n,fill = "red", alpha =0.4) +
+    labs(x = "Mean Values", 
+         title= sprintf("Distribution of Arithmetic and Geometric mean values of %s", var), subtitle = "Blue represents arithmetic, red represents geometric") +
+    theme_bw() +
+    theme(plot.title = element_text(hjust=0.5),
+          plot.subtitle = element_text(hjust=0.5))
+}
+```
+
+# Questions and Answers
+
+## Part 1
+
+For each distribution below, generate a figure of the PDF and CDF. Mark the mean and median in the figure.
+
+For each distribution below, generate a figure of the PDF and CDF of the transformation Y = log(X) random variable. Mark the mean and median in the figure. You may use simulation or analytic methods in order find the PDF and CDF of the transformation.
+
+For each of the distributions below, generate 1000 samples of size 100. For each sample, calculate the geometric and arithmetic mean. Generate a scatter plot of the geometic and arithmetic sample means. Add the line of identify as a reference line.
+
+Generate a histogram of the difference between the arithmetic mean and the geometric mean.
+
+**Distribution 1**
+
+X∼GAMMA(shape=3,scale=1)
+
+1.
+
+```{r, fig.width = 10, fig.height=7}
+gamma <- rgamma(10000, shape=3, scale=1)
+x <- 1:10000
+loggamma <- log(gamma)
+df_gamma <- data.frame(x = x, gamma = gamma,loggamma = loggamma)
+pdf(df_gamma, gamma, "gamma distribution")
+cdf(df_gamma, gamma, "gamma distribution")
+```
+
+2. 
+
+```{r, fig.width=10,fig.height=7}
+pdf(df_gamma, loggamma, "gamma distribution under log transformation")
+cdf(df_gamma, loggamma, "gamma distribution under log transformation")
+```
+
+3.
+
+```{r, fig.width=10, fig.height=7}
+d <- data.frame()
+  for (i in 1:1000) {
+      n <- rgamma(100, shape=3, scale=1)
+      d[i,1] <- mean(n)
+      d[i,2] <- exp(mean(log(n)))
+  }
+d <- d %>% 
+  rename(arithmetic = V1, geometric = V2)
+arith_vs_geom(d, "geometric distribution")
+```
+
+4. 
+
+```{r,fig.width=10, fig.height=7}
+hist_plot(d, "gammma distribution", 0.05)
+```
+
+**Distribution 2**
+
+X∼LOG NORMAL(μ=−1,σ=1)
+
+1.
+
+```{r, fig.width=10, fig.height=7}
+lnorm <- rlnorm(1000, meanlog = -1, sdlog = 1)
+loglnorm <- log(lnorm)
+x <- 1:1000
+df_lnorm <- data.frame(x = x, lnorm = lnorm, loglnorm = loglnorm)
+pdf(df_lnorm, lnorm, "lognormal distribution")
+cdf(df_lnorm, lnorm, "lognormal distribution")
+```
+
+2. 
+
+```{r, fig.width = 10, fig.height = 7}
+pdf(df_lnorm, loglnorm, "lognormal distribution under log transformation")
+cdf(df_lnorm, loglnorm, "lognormal distribution under log transformation")
+```
+3.
+```{r, fig.width = 10, fig.height=7}
+d <- data.frame()
+  for (i in 1:1000) {
+      n <- rlnorm(100, meanlog=-1, sdlog= 1)
+      d[i,1] <- mean(n)
+      d[i,2] <- exp(mean(log(n)))
+  }
+d <- d %>% 
+  rename(arithmetic = V1, geometric = V2)
+arith_vs_geom(d, "lognormal distribution")
+```
+
+4. 
+```{r,fig.width=10, fig.height=7}
+hist_plot(d, "lognormal distribution",0.01)
+```
+
+**Distribution 3**
+
+X∼UNIFORM(0,12)
+
+1. 
+
+```{r, fig.width=10, fig.height=7}
+unif <- runif(1000, min = 0, max = 1)
+logunif <- log(unif)
+x <- 1:1000
+df_unif <- data.frame(x = x, unif = unif, logunif = logunif)
+pdf(df_unif, unif, "uniform distribution")
+cdf(df_unif, unif, "uniform distribution")
+```
+
+2. 
+```{r,fig.width=10, fig.height=7}
+pdf(df_unif, logunif, "uniform distribution under log transformation")
+cdf(df_unif, logunif, "uniform distribution under log transformation")
+```
+
+3.
+
+```{r,fig.width=10, fig.height=7}
+d <- data.frame()
+  for (i in 1:1000) {
+      n <- rlnorm(100, meanlog=-1, sdlog= 1)
+      d[i,1] <- mean(n)
+      d[i,2] <- exp(mean(log(n)))
+  }
+d <- d %>% 
+  rename(arithmetic = V1, geometric = V2)
+arith_vs_geom(d, "uniform distribution")
+```
+
+4. 
+
+```{r,fig.width=10, fig.height=7}
+hist_plot(d, "uniform distribution",0.01)
+```
+
+## Part 2
+
+Show that if Xi> for all i, then the arithmetic mean is greater than or equal to the geometric mean.
+
+Hint: Start with the sample mean of the transformation Yi=log(Xi).
+
+
+## Part 3
+
+What is the correct relationship between E[log(X)] and log(E[X])? Is one always larger? Equal? Explain your answer.
+
+`E[log(X)]` is the mean of the log of X and `log(E[X])` is the log of the mean of X. The relationship between these two functions is that there are positive correlated that is as `log(E[X])` gets bigger `E[log(X)]`. One of the functions is not always bigger than the other. If `log(E[X])` is bigger than `E[log(X)]`, then that means `log[X]` has a negative non-linear relationship with `X`. If `E[log(X)]` is bigger than `log(E[X])`, then that means `log[X]` has a positive non-linear relationship with `X`. 
+
+# Conclusion

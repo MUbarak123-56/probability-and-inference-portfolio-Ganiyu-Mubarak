@@ -1,5 +1,5 @@
 ---
-title: "Logartithmic Transformation"
+title: "Logarithmic Transformation"
 author: "Mubarak Ganiyu"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
@@ -20,7 +20,11 @@ library(tidyverse)
 
 # Introduction
 
+Probability distributions have made it possible for people to develop a better understanding of the world as we apply them in different areas of life to test for the chances of random events occurring. Thereby, being able to measure the chances of success in different domains. There are many statistical distributions out there. However, this deliverable will be focusing only on three: gamma, lognormal and uniform.
+
 # Method
+
+There are different functions that were used to generate the charts that were used in this deliverable. These functions can be seen in the code chunk below. The `pdf` function is used to plot the probability density function. The `cdf` is used to plot the cumulative distribution function. The `arith_vs_geom` is used to showcase the relationship between the arithmetic and geometric means. The final function, `hist_plot`, displays a side-by-side histogram distribution of both the arithmetic and geometric means.
 
 ```{r}
 pdf <- function(df, type, var) {
@@ -52,12 +56,12 @@ cdf <- function(df, type, var) {
 
 arith_vs_geom <- function(d, var) {
   ggplot(d) +
-    geom_point(aes(x = arithmetic, y = geometric), color = "blue") +
-    geom_smooth(aes(x = arithmetic, y = geometric), method = "lm",
+    geom_point(aes(y = arithmetic, x = geometric), color = "blue") +
+    geom_smooth(aes(y = arithmetic, x = geometric), method = "lm",
                 color = "black", se = FALSE) +
     labs(title=sprintf("Geometric vs Arithmetic mean for %s", var),
-         x = "Arithmetic mean",
-         y = "Geometric mean") +
+         y = "Arithmetic mean",
+         x = "Geometric mean") +
     theme_bw() +
     theme(plot.title = element_text(hjust=0.5),
           plot.subtitle = element_text(hjust=0.5))
@@ -209,7 +213,7 @@ arith_vs_geom(d, "uniform distribution")
 hist_plot(d, "uniform distribution",0.01)
 ```
 
-## Part 2
+## Part 2 (Optional)
 
 Show that if Xi> for all i, then the arithmetic mean is greater than or equal to the geometric mean.
 
@@ -220,6 +224,16 @@ Hint: Start with the sample mean of the transformation Yi=log(Xi).
 
 What is the correct relationship between E[log(X)] and log(E[X])? Is one always larger? Equal? Explain your answer.
 
-`E[log(X)]` is the mean of the log of X and `log(E[X])` is the log of the mean of X. The relationship between these two functions is that there are positive correlated that is as `log(E[X])` gets bigger `E[log(X)]`. One of the functions is not always bigger than the other. If `log(E[X])` is bigger than `E[log(X)]`, then that means `log[X]` has a negative non-linear relationship with `X`. If `E[log(X)]` is bigger than `log(E[X])`, then that means `log[X]` has a positive non-linear relationship with `X`. 
+`E[log(X)]` is the mean of the log of X and `log(E[X])` is the log of the mean of X. The relationship between these two functions is that there are positive correlated, that is as `log(E[X])` gets bigger `E[log(X)]`. Moreover, it can be used to connect the arithmetic mean and the geometric mean as displayed below, in cases in which the arithmetic mean is greater than the geometric mean. This connection can be inferred from the scatter plots in Part I.
+
+$$Arithmetic > Geometric $$
+The next step is to insert the equations that describe both arithmetic mean and geometric mean
+$$E[X] > e^{E(log[X])}$$
+Multiplying both sides by log will lead to the equation below:
+$$log(E[X]) > E(log[X])$$
+
+According to our equation above, `log(E[X])` is bigger than `E[log(X)]`. This was derived as result of the arithmetic mean always being greater than the geometric mean.
 
 # Conclusion
+
+Seeing the effect of log transformation on random variables was a great way to see how the distribution of random variables change upon logarithmic applications. Once again, this deliverable highlights the importance of probability distributions.

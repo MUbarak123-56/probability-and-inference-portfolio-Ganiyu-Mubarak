@@ -8,6 +8,9 @@ output:
     number_sections: yes
     toc_depth: 3
     toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
 ---
 
 ```{r global options, include = FALSE}
@@ -71,10 +74,9 @@ arith_vs_geom <- function(d, var, n1, n2) {
 
 hist_plot <- function(d, var, n) {
   ggplot(d) +
-    geom_histogram(aes(x = arithmetic), binwidth=n,fill= "blue",alpha =0.4) +
-    geom_histogram(aes(x = geometric), binwidth=n,fill = "red", alpha =0.4) +
-    labs(x = "Mean Values", 
-         title= sprintf("Distribution of Arithmetic and Geometric mean values of %s", var), subtitle = "Blue represents arithmetic, red represents geometric") +
+    geom_histogram(aes(x = abs(arithmetic-geometric)), binwidth=n,fill= "blue",alpha =0.4) +
+    labs(x = "Difference between mean values", 
+         title= sprintf("Distribution of the difference between Arithmetic and Geometric mean values of %s", var)) +
     theme_bw() +
     theme(plot.title = element_text(hjust=0.5),
           plot.subtitle = element_text(hjust=0.5))
@@ -93,6 +95,8 @@ For each of the distributions below, generate 1000 samples of size 100. For each
 
 Generate a histogram of the difference between the arithmetic mean and the geometric mean.
 
+*In all the graphs, a blue line represents the mean and a red line represents the median*
+
 **Distribution 1**
 
 X∼GAMMA(shape=3,scale=1)
@@ -100,17 +104,22 @@ X∼GAMMA(shape=3,scale=1)
 1.
 
 ```{r, fig.width = 10, fig.height=7}
-gamma <- rgamma(10000, shape=3, scale=1)
-x <- 1:10000
-loggamma <- log(gamma)
-df_gamma <- data.frame(x = x, gamma = gamma,loggamma = loggamma)
-pdf(df_gamma, gamma, "gamma distribution")
-cdf(df_gamma, gamma, "gamma distribution")
+mean <- mean(rgamma(1000, shape=3,scale=1))
+curve(dgamma(x,shape=3,scale=1), xlim = c(0,10), main = "Probability density function of gamma distribution", xlab = "value", ylab = "density")
+abline(v = mean, lwd = 2, col = "blue")
+abline(v = qgamma(0.5,shape=3,scale=1), lwd = 2, col = "red")
+curve(pgamma(x,shape=3,scale=1), xlim = c(0,10), main = "Cumulative distribution function of gamma distribution", xlab = "value", ylab = "probability")
+abline(v = mean, lwd = 2, col = "blue")
+abline(v = qgamma(0.5,shape=3,scale=1), lwd = 2, col = "red")
 ```
 
 2. 
 
 ```{r, fig.width=10,fig.height=7}
+gamma <- rgamma(10000, shape=3, scale=1)
+x <- 1:10000
+loggamma <- log(gamma)
+df_gamma <- data.frame(x = x, gamma = gamma,loggamma = loggamma)
 pdf(df_gamma, loggamma, "gamma distribution under log transformation")
 cdf(df_gamma, loggamma, "gamma distribution under log transformation")
 ```
@@ -142,17 +151,23 @@ X∼LOG NORMAL(μ=−1,σ=1)
 1.
 
 ```{r, fig.width=10, fig.height=7}
-lnorm <- rlnorm(1000, meanlog = -1, sdlog = 1)
-loglnorm <- log(lnorm)
-x <- 1:1000
-df_lnorm <- data.frame(x = x, lnorm = lnorm, loglnorm = loglnorm)
-pdf(df_lnorm, lnorm, "lognormal distribution")
-cdf(df_lnorm, lnorm, "lognormal distribution")
+mean <- mean(rlnorm(1000, meanlog = -1, sdlog = 1))
+curve(dlnorm(x, meanlog = -1, sdlog = 1), xlim = c(0,5), main = "Probability density function of lognormal distribution", xlab = "value", ylab = "density")
+abline(v = mean, lwd = 2, col = "blue")
+abline(v = qlnorm(0.5,meanlog = -1, sdlog = 1), lwd = 2, col = "red")
+
+curve(plnorm(x,meanlog = -1, sdlog = 1), xlim = c(0,5), main = "Cumulative distribution function of lognormal distribution", xlab = "value", ylab = "probability")
+abline(v = mean, lwd = 2, col = "blue")
+abline(v = qlnorm(0.5,meanlog = -1, sdlog = 1), lwd = 2, col = "red")
 ```
 
 2. 
 
 ```{r, fig.width = 10, fig.height = 7}
+lnorm <- rlnorm(1000, meanlog = -1, sdlog = 1)
+loglnorm <- log(lnorm)
+x <- 1:1000
+df_lnorm <- data.frame(x = x, lnorm = lnorm, loglnorm = loglnorm)
 pdf(df_lnorm, loglnorm, "lognormal distribution under log transformation")
 cdf(df_lnorm, loglnorm, "lognormal distribution under log transformation")
 ```
@@ -181,16 +196,22 @@ X∼UNIFORM(0,12)
 1. 
 
 ```{r, fig.width=10, fig.height=7}
-unif <- runif(1000, min = 0, max = 1)
-logunif <- log(unif)
-x <- 1:1000
-df_unif <- data.frame(x = x, unif = unif, logunif = logunif)
-pdf(df_unif, unif, "uniform distribution")
-cdf(df_unif, unif, "uniform distribution")
+mean <- mean(runif(1000, min = 0, max = 1))
+curve(dunif(x, min = 0, max = 1), xlim = c(0,1), main = "Probability density function of uniform distribution", xlab = "value", ylab = "density")
+abline(v = mean, lwd = 2, col = "blue")
+abline(v = qunif(0.5,min = 0, max = 1), lwd = 2, col = "red")
+
+curve(punif(x,min = 0, max = 1), xlim = c(0,1), main = "Cumulative distribution function of uniform distribution", xlab = "value", ylab = "probability")
+abline(v = mean, lwd = 2, col = "blue")
+abline(v = qunif(0.5,min = 0, max = 1), lwd = 2, col = "red")
 ```
 
 2. 
 ```{r,fig.width=10, fig.height=7}
+unif <- runif(1000, min = 0, max = 1)
+logunif <- log(unif)
+x <- 1:1000
+df_unif <- data.frame(x = x, unif = unif, logunif = logunif)
 pdf(df_unif, logunif, "uniform distribution under log transformation")
 cdf(df_unif, logunif, "uniform distribution under log transformation")
 ```

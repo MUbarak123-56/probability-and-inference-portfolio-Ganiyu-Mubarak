@@ -40,11 +40,18 @@ porder <- function(x) {
 }
 
 qorder <- function(p) {
-  c <- 
-  for (i in seq_along[p]) {
-    q[i] <- quantile(c, p[i])
+  r <- curve(porder(x),-0.2,0.2)
+  m <- mean(r$x)
+  sd <- sd(r$x)
+  q <- c()
+  for (i in seq_along(p)) {
+    q[i] <- qnorm(p[i], mean = m, sd = sd)
   }
+  df <- data.frame(p = p, q = q)
+  return(df)
 }
+p <- seq(0.01, 0.99, by = 0.01)
+qorder(p)
 ```
 
 
@@ -97,6 +104,7 @@ Q: Using the simulated sampling distribution from the previous question, create 
 hist(b,
      freq = FALSE,
      prob = TRUE,
+     breaks = 10,
      xlab = "value", xlim = range(b),
      main = "Probability density function of the median (100th order statistic)")
 curve(dorder(x), col = "blue", add = TRUE)
@@ -107,11 +115,10 @@ Q: One very common way to compare a random sample to a theoretical candidate dis
 ```{r}
 b <- c()
 set.seed(0)
-for (i in 1:100) {
+for (i in 1:99) {
   n <- rnorm(200, mean = 0, sd= 1)
   b[i] <- quantile(n, 0.5)
 }
-
 b <- sort(b)
 p <- seq(0, 1, by = 0.01)
 p

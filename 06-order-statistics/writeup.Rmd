@@ -27,6 +27,7 @@ library(tidyverse)
 # Methods
 
 ```{r}
+rm(list=ls()) 
 dorder <- function(x) {
   100*
   choose(200,100)
@@ -39,8 +40,8 @@ porder <- function(x) {
   pbinom(100-1, 200, pnorm(x, mean = 0, sd = 1), lower.tail = FALSE)
 }
 
-qorder <- function(p) {
-  r <- curve(porder(x),-0.2,0.2)
+qorder <- function(p, n1, n2) {
+  r <- curve(porder(x),n1,n2)
   m <- mean(r$x)
   sd <- sd(r$x)
   q <- c()
@@ -50,8 +51,6 @@ qorder <- function(p) {
   df <- data.frame(p = p, q = q)
   return(df)
 }
-p <- seq(0.01, 0.99, by = 0.01)
-qorder(p)
 ```
 
 
@@ -78,8 +77,15 @@ curve(porder(x), -0.5,0.5, col = "blue",
 Q: Write an R function that is the quantile function for the median in this sample. (You have several options for how to write this function.) Generate a plot of the function.
 
 ```{r, fig.width = 10, fig.height = 7}
-
-#curve(qorder, 0,1)
+p <- seq(0.01, 0.99, by = 0.01)
+d <- qorder(p,-0.2,0.2)
+ggplot(d) +
+  geom_line(aes(x = p, y = q), color = "red") +
+  labs(title = "Quantile distribution of median (100th order statistic)",
+       x = "probability", 
+       y = "value") +
+  theme_bw() +
+  theme(plot.title= element_text(hjust=0.5))
 ```
 
 Q: Simulate the sampling distribution for the median. Create a plot of the empirical CDF (ECDF). Overlay the plot of the ECDF with a plot of the CDF.
@@ -94,7 +100,7 @@ for (i in 1:100) {
 p <- ecdf(b)
 plot(p, main = "Probability density function of the median (100th order statistic)",
       xlab = "value",
-      ylab = "density", xlim = c(-0.2,0.2))
+      ylab = "density",xlim = c(-0.2,0.2))
 curve(porder(x), col = "blue", add = TRUE)
 ```
 
@@ -112,7 +118,7 @@ curve(dorder(x), col = "blue", add = TRUE)
 
 Q: One very common way to compare a random sample to a theoretical candidate distribution is the QQ plot. It is created by plotting quantiles of the theoretical distribution on the x-axis and empirical quantiles from the sample on the y-axis.
 
-```{r}
+```{r, fig.width=10, fig.height=7}
 b <- c()
 set.seed(0)
 for (i in 1:99) {
@@ -120,9 +126,17 @@ for (i in 1:99) {
   b[i] <- quantile(n, 0.5)
 }
 b <- sort(b)
-p <- seq(0, 1, by = 0.01)
-p
-
+p <- seq(0.01,0.99, by = 0.01)
+d <- qorder(p,-0.2,0.2)
+g <- cbind(d, b)
+x <- seq(-0.25,0.25, by = ((0.5)/(99 - 1)))
+y <- x
+ggplot(g) +
+  geom_point(aes(x = q, y = b), col = "red") +
+  geom_line(aes(x = x, y = y)) +
+  labs(title = "QQplot",
+       x = "Theoretical quantiles",
+       y = "Sample quantiles")
 ```
 
 Q: Modify the dorder, porder, and qorder functions so that the functions take a new parameter k (for the kth order statistic) so that the functions will work for any order statistic and not just the median.
@@ -140,28 +154,45 @@ porder <- function(x,k) {
   pbinom(k-1, 200, pnorm(x, mean = 0, sd = 1), lower.tail = FALSE)
 }
 
-qorder <- function(p,k) {
-  b <- c()
-  set.seed(0)
-  for (i in 1:100) {
-    n <- rnorm(200, mean = 0, sd = 1)
-    b[i] <- quantile(n, p)
+qorder <- function(p,k, n1, n2) {
+  r <- curve(porder(x,k),n1,n2)
+  m <- mean(r$x)
+  sd <- sd(r$x)
+  q <- c()
+  for (i in seq_along(p)) {
+    q[i] <- qnorm(p[i], mean = m, sd = sd)
   }
-  return(b)
+  df <- data.frame(p = p, q = q)
+  return(df)
 }
 ```
 
 Q: Generate the QQ plot for simulated data from the sampling distribution of the sample max and the theoretical largest order statistic distribution.
 
-```{r}
+```{r, fig.width=10, fig.height=7}
 b <- c()
 set.seed(0)
-for (i in 1:100) {
-  n <- rnorm(200, mean = 0, sd = 1)
-  b[i] <- quantile(n, 1)
+for (i in 1:99) {
+  n <- rnorm(200, mean = 0, sd= 1)
+  b[i] <- quantile(n, 0.99)
 }
-
+b <- sort(b)
+p <- seq(0.01, 0.99, by = 0.01)
+d <- qorder(p, 200, 1.6,3.2)
+g <- cbind(d, b)
+g
+x <- seq(1.6,3.2, by = ((1.6)/(99 - 1)))
+y <- x
+ggplot(g) +
+  geom_point(aes(x = q, y = b), col = "red") +
+  geom_line(aes(x = x, y = y)) +
+  labs(title = "QQplot of maximum values",
+       x = "Theoretical quantiles",
+       y = "Sample quantiles") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust=0.5))
 ```
+
 
 Q: Modify the dorder, porder, and qorder functions so that the functions take new parameters dist and ... so that the functions will work for any continuous distribution that has d and p functions defined in R.
 
@@ -181,15 +212,17 @@ porder <- function(x,k, dist, ...) {
   pbinom(k-1, 200, Fm(x, ...), lower.tail = FALSE)
 }
 
-qorder <- function(p, k, dist, ...) {
-  r <- eval(parse(text = str_c("r", dist, sep = "")))
-  b <- c()
-  set.seed(0)
-  for (i in 1:100) {
-    n <- r(200, ...)
-    b[i] <- quantile(n, p)
+qorder <- function(p, k, n1, n2, dist, ...) {
+  qm <- eval(parse(text = str_c("q", dist, sep = "")))
+  r <- curve(porder(x,k),n1,n2)
+  m <- mean(r$x)
+  sd <- sd(r$x)
+  q <- c()
+  for (i in seq_along(p)) {
+    q[i] <- qm(p[i], ...)
   }
-  return(b)
+  df <- data.frame(p = p, q = q)
+  return(df)
 }
 ```
 
@@ -209,44 +242,3 @@ curve(porder(x, 1, dist = "norm", mean = 0, sd = 1), xlim = c(-5,-1), col = "blu
 
 # Conclusion
 
-```{r}
-fk <- function(x,k,n,dist = "gamma",...){
-  f <- eval(parse(text = str_c("d", dist, sep = "")))
-  Fm <- eval(parse(text = str_c("p", dist, sep = "")))
-  k*
-  choose(n,k)
-  (Fm(x, shape=3,scale=12))^(k-1)*
-  (1-Fm(x, shape=3,scale=12))^(n-k)*
-  f(x, shape=3,scale=12)
-}
-
-Fk <- function(x,k,n){
-  pbinom(k-1, n, pgamma(x, shape=3, scale =12), lower.tail = FALSE)
-}
-#d <- density(v)
-#plot(d, main = "", ylim = c(0,0.25),
-#      xlab = parse(text="X[(25)]"))
-
-#curve(fk(x, 25,100), 0, 30, add = TRUE, lwd = 3, col = "blue")
-```
-
-
-
-```{r}
-dorder <- function(x, k, dist, ...) {
-  dist(...)
-}
-dorder <- function(x, k, dist, ...) {
-  f <- parse(text = str_c("d", dist, sep = ""))
-  Fn <- parse(text = str_c("p", dist, sep = ""))
-  dist(...)
-}
-b <- c()
-set.seed(0)
-for (i in 1:100000) {
-  n <- rgamma(400, shape = 6, scale = 12000)
-  b[i] <- quantile(n, 0.6)
-}
-mean(b)
-dorder(10,5,pnorm, q=1, mean=0, sd = 1)
-```

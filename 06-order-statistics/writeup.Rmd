@@ -1,5 +1,5 @@
 ---
-title: "Order Statistics"
+title: "Which quantiles of a continuous distribution can one estimate with more precision?"
 author: "Mubarak Ganiyu"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
@@ -23,11 +23,13 @@ library(tidyverse)
 
 # Introduction
 
+Dealing with distributions in the world of statistics often provide researchers with a better idea of obtaining the possibility of obtaining a certain random variable under the characteristics of that distribution. The probability density function gives a researcher a great idea about the chances of obtaining a certain variable, and the cumulative distribution function tells us where that variable ranks among all the variables (i.e. what proportion of variables it supersedes). Using these two functions, charts can be created to understand more about the distribution of any phenomena. There is also another distribution function called quantile distribution function. This is the reverse of cumulative distribution function. The objective of the quantile distribution function is to take in a certain percentage and return the random variable that happens to be greater than that percentage of variables. There are two ways to develop the distributions above: via analytics and simulation. Hence, the agenda of this deliverable is to use the order statistics approach (analytical) and simulation approach to generate distributions of certain percentiles of a random variable, and compare the performance of both approaches. 
 
 # Methods
 
+The functions below were used to generate the distributions in this blog post. `dorder` was used to build the probability density function curve. `porder` was used to build the cumulative distribution function. And `qorder` was used to build  the quantile distribution function. Over the course of the deliverable, the functions were transformed to include parameters such as kth value, distribution name and distribution parameters.
+
 ```{r}
-rm(list=ls()) 
 dorder <- function(x) {
   100*
   choose(200,100)
@@ -40,10 +42,14 @@ porder <- function(x) {
   pbinom(100-1, 200, pnorm(x, mean = 0, sd = 1), lower.tail = FALSE)
 }
 
-qorder <- function(p, n1, n2) {
-  r <- curve(porder(x),n1,n2)
-  m <- mean(r$x)
-  sd <- sd(r$x)
+qorder <- function(p) {
+  r <- curve(porder(x),-5,5)
+  d <- data.frame(x = r$x, y = r$y)
+  d <- d %>% 
+    filter(y >= 0.01 & y <= 0.999)
+  n <- curve(porder(x),min(d$x), max(d$x))
+  m <- mean(n$x)
+  sd <- sd(n$x)
   q <- c()
   for (i in seq_along(p)) {
     q[i] <- qnorm(p[i], mean = m, sd = sd)
@@ -75,13 +81,15 @@ curve(porder(x), -0.5,0.5, col = "blue",
 ```
 
 Q: Write an R function that is the quantile function for the median in this sample. (You have several options for how to write this function.) Generate a plot of the function.
+```{r, fig.show='hide'}
+p <- seq(0.01, 0.99, by = 0.01)
+d <- qorder(p)
+```
 
 ```{r, fig.width = 10, fig.height = 7}
-p <- seq(0.01, 0.99, by = 0.01)
-d <- qorder(p,-0.2,0.2)
 ggplot(d) +
   geom_line(aes(x = p, y = q), color = "red") +
-  labs(title = "Quantile distribution of median (100th order statistic)",
+  labs(title = "Quantile distribution function of median (100th order statistic)",
        x = "probability", 
        y = "value") +
   theme_bw() +
@@ -107,36 +115,70 @@ curve(porder(x), col = "blue", add = TRUE)
 Q: Using the simulated sampling distribution from the previous question, create a histogram (on the density scale). Overlay the histogram with a plot of the density function.
 
 ```{r, fig.width = 10, fig.height = 7}
+b <- c()
+set.seed(0)
+for (i in 1:100) {
+  n <- rnorm(200, mean = 0, sd= 1)
+  b[i] <- quantile(n, 0.5)
+}
+n <- data.frame(b = b)
+n <- n %>%
+  mutate(b = if_else(b < -0.15 & b >= min(b), -0.18, 
+         if_else(b < -0.1 & b >= -0.15, -0.13,
+         if_else(b < -0.05 & b >= -0.1, -0.075,
+         if_else(b < 0 & b >= -0.05,-0.025,
+         if_else(b >= 0 & b < 0.05,0.025,
+         if_else(b >= 0.05 & b < 0.1,0.075,
+         if_else(b >= 0.1 & b < 0.15,0.13,
+         if_else(b >= 0.15 & b <= max(b), 0.18)))))))))
+n
 hist(b,
      freq = FALSE,
      prob = TRUE,
      breaks = 10,
      xlab = "value", xlim = range(b),
      main = "Probability density function of the median (100th order statistic)")
-curve(dorder(x), col = "blue", add = TRUE)
+curve(dorder(x), add = TRUE, col = "blue")
 ```
 
 Q: One very common way to compare a random sample to a theoretical candidate distribution is the QQ plot. It is created by plotting quantiles of the theoretical distribution on the x-axis and empirical quantiles from the sample on the y-axis.
-
-```{r, fig.width=10, fig.height=7}
+```{r, fig.show='hide'}
 b <- c()
-set.seed(0)
+set.seed(42)
 for (i in 1:99) {
   n <- rnorm(200, mean = 0, sd= 1)
   b[i] <- quantile(n, 0.5)
 }
 b <- sort(b)
 p <- seq(0.01,0.99, by = 0.01)
-d <- qorder(p,-0.2,0.2)
+d <- qorder(p)
 g <- cbind(d, b)
 x <- seq(-0.25,0.25, by = ((0.5)/(99 - 1)))
 y <- x
+```
+
+```{r, fig.width=10, fig.height=7}
 ggplot(g) +
   geom_point(aes(x = q, y = b), col = "red") +
   geom_line(aes(x = x, y = y)) +
-  labs(title = "QQplot",
+  labs(title = "QQplot of the median (100th order statistic)",
        x = "Theoretical quantiles",
-       y = "Sample quantiles")
+       y = "Sample quantiles") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+```
+The two distributions are not in agreement with one another as the points of the plot are not inline with the `y = x` line on the chart. This can be evidenced below when reviewing the probability density function distributions of the curves.
+
+```{r}
+ggplot(g) +
+  geom_density(aes(x = q), color = "blue") +
+  geom_density(aes(x = b), color = "red") +
+  labs(title = "Probability density function for theoretical and sample quantiles",
+       subtitle = "Blue stands for theoretical, Red stands for sample") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
 ```
 
 Q: Modify the dorder, porder, and qorder functions so that the functions take a new parameter k (for the kth order statistic) so that the functions will work for any order statistic and not just the median.
@@ -154,10 +196,14 @@ porder <- function(x,k) {
   pbinom(k-1, 200, pnorm(x, mean = 0, sd = 1), lower.tail = FALSE)
 }
 
-qorder <- function(p,k, n1, n2) {
-  r <- curve(porder(x,k),n1,n2)
-  m <- mean(r$x)
-  sd <- sd(r$x)
+qorder <- function(p,k) {
+  r <- curve(porder(x,k),-5,5)
+  d <- data.frame(x = r$x, y = r$y)
+  d <- d %>% 
+    filter(y >= 0.01 & y <= 0.999)
+  n <- curve(porder(x,k),min(d$x), max(d$x))
+  m <- mean(n$x)
+  sd <- sd(n$x)
   q <- c()
   for (i in seq_along(p)) {
     q[i] <- qnorm(p[i], mean = m, sd = sd)
@@ -169,7 +215,7 @@ qorder <- function(p,k, n1, n2) {
 
 Q: Generate the QQ plot for simulated data from the sampling distribution of the sample max and the theoretical largest order statistic distribution.
 
-```{r, fig.width=10, fig.height=7}
+```{r, fig.show='hide'}
 b <- c()
 set.seed(0)
 for (i in 1:99) {
@@ -178,11 +224,13 @@ for (i in 1:99) {
 }
 b <- sort(b)
 p <- seq(0.01, 0.99, by = 0.01)
-d <- qorder(p, 200, 1.6,3.2)
+d <- qorder(p, 200)
 g <- cbind(d, b)
-g
-x <- seq(1.6,3.2, by = ((1.6)/(99 - 1)))
+x <- seq(1.5,3, by = ((1.5)/(99 - 1)))
 y <- x
+```
+
+```{r, fig.width=10, fig.height=7}
 ggplot(g) +
   geom_point(aes(x = q, y = b), col = "red") +
   geom_line(aes(x = x, y = y)) +
@@ -212,11 +260,15 @@ porder <- function(x,k, dist, ...) {
   pbinom(k-1, 200, Fm(x, ...), lower.tail = FALSE)
 }
 
-qorder <- function(p, k, n1, n2, dist, ...) {
+qorder <- function(p, k, dist, ...) {
   qm <- eval(parse(text = str_c("q", dist, sep = "")))
-  r <- curve(porder(x,k),n1,n2)
-  m <- mean(r$x)
-  sd <- sd(r$x)
+  r <- curve(porder(x,k),-5,5)
+  d <- data.frame(x = r$x, y = r$y)
+  d <- d %>% 
+    filter(y >= 0.01 & y <= 0.999)
+  n <- curve(porder(x,k),min(d$x), max(d$x))
+  m <- mean(n$x)
+  sd <- sd(n$x)
   q <- c()
   for (i in seq_along(p)) {
     q[i] <- qm(p[i], ...)
@@ -242,3 +294,6 @@ curve(porder(x, 1, dist = "norm", mean = 0, sd = 1), xlim = c(-5,-1), col = "blu
 
 # Conclusion
 
+Comparing theoretical outcomes to empirical ones is often a great way to find out whether to know how both approaches differ (or agree) with one another. This could provide researchers with a better idea on how to conduct research in order to ensure they build better models of how the world works. 
+
+ 

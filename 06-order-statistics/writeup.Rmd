@@ -64,17 +64,25 @@ qorder <- function(p) {
 
 Q: Begin with the median from a sample of N=200 from the standard normal distribution. Write an R function that is the density function for the median in this sample. Note that the 100th order statistic is approximately the median, and use the order statistic formula discussed in class. Generate a plot of the function.
 
+```{r, fig.show="hide"}
+r <- curve(dorder(x), -0.4, 0.4)
+```
+
 ```{r, fig.width = 10, fig.height = 7}
-curve(dorder(x), -0.5, 0.5, col = "blue",
-      main = "Probability density function of the median (100th order statistic)",
-      xlab = "value",
-      ylab = "density")
+n <- data.frame(x = r$x, y = r$y*10^60)
+ggplot(n) + 
+  geom_line(aes(x = x, y = y), color = "blue") +
+  labs(title = "Probability density function of the median (100th order statistic)",
+       x = "value",
+       y = "density") +
+  theme_light() +
+  theme(plot.title = element_text(hjust=0.5))
 ```
 
 Q: Write an R function that is the probability function for the median in this sample. Use the order statistic formula discussed in class. Generate a plot of the function.
 
 ```{r, fig.width = 10, fig.height = 7}
-curve(porder(x), -0.5,0.5, col = "blue",
+curve(porder(x), -0.4,0.4, col = "blue",
       main = "Cumulative distribution function of the median (100th order statistic)",
       xlab = "value",
       ylab = "probability")
@@ -106,7 +114,7 @@ for (i in 1:100) {
   b[i] <- quantile(n, 0.5)
 }
 p <- ecdf(b)
-plot(p, main = "Probability density function of the median (100th order statistic)",
+plot(p, main = "Cumulative distribution function of the median (100th order statistic) for both approaches",
       xlab = "value",
       ylab = "density",xlim = c(-0.2,0.2))
 curve(porder(x), col = "blue", add = TRUE)
@@ -114,32 +122,30 @@ curve(porder(x), col = "blue", add = TRUE)
 
 Q: Using the simulated sampling distribution from the previous question, create a histogram (on the density scale). Overlay the histogram with a plot of the density function.
 
-```{r, fig.width = 10, fig.height = 7}
+```{r, fig.show = "hide"}
 b <- c()
 set.seed(0)
-for (i in 1:100) {
+for (i in 1:101) {
   n <- rnorm(200, mean = 0, sd= 1)
   b[i] <- quantile(n, 0.5)
 }
-n <- data.frame(b = b)
-n <- n %>%
-  mutate(b = if_else(b < -0.15 & b >= min(b), -0.18, 
-         if_else(b < -0.1 & b >= -0.15, -0.13,
-         if_else(b < -0.05 & b >= -0.1, -0.075,
-         if_else(b < 0 & b >= -0.05,-0.025,
-         if_else(b >= 0 & b < 0.05,0.025,
-         if_else(b >= 0.05 & b < 0.1,0.075,
-         if_else(b >= 0.1 & b < 0.15,0.13,
-         if_else(b >= 0.15 & b <= max(b), 0.18)))))))))
-n
-hist(b,
-     freq = FALSE,
-     prob = TRUE,
-     breaks = 10,
-     xlab = "value", xlim = range(b),
-     main = "Probability density function of the median (100th order statistic)")
-curve(dorder(x), add = TRUE, col = "blue")
+r <- curve(dorder(x),-0.225,0.25)
 ```
+
+```{r, fig.width = 10, fig.height = 7}
+n <- data.frame(b = b, x = r$x, y = r$y*10^60)
+ggplot(n) + 
+  geom_histogram(aes(x = b,y=..density../10),bins = 10, color = "black", fill= "white") +
+  geom_line(aes(x = x, y = y), color = "blue") +
+  labs(title = "Probability density function of the median (100th order statistic) for both approaches",
+       x = "values", 
+       y = "probability",
+       subtitle = "Blue is for analytic, black is for simulation") +
+  theme_light() +
+  theme(plot.title = element_text(hjust=0.5),
+        plot.subtitle = element_text(hjust=0.5))
+```
+
 
 Q: One very common way to compare a random sample to a theoretical candidate distribution is the QQ plot. It is created by plotting quantiles of the theoretical distribution on the x-axis and empirical quantiles from the sample on the y-axis.
 ```{r, fig.show='hide'}

@@ -6,3 +6,4 @@
 - Probability Calculations: https://rpubs.com/Mabrouk12/probability-calculations
 - Home Advantage: https://rpubs.com/Muby/home-advantage
 - Log Transformation: https://rpubs.com/Mabrouk12/log-transform
+- Order Statistics: https://rpubs.com/Mabrouk12/order-statistics

@@ -49,52 +49,52 @@ fit <- mle(ll, start = list(shape=1,scale=1),method = "L-BFGS-B",
            lower = c(0, 0.01))
 pdf <- function(y, dist, ..., word, word2) {
   fm <- eval(parse(text = str_c("d", dist, sep = "")))
-  hist(y,freq=FALSE, main = sprintf("%s distribution's probability density function\n using %s", word, word2),
+  hist(y,breaks=20,freq=FALSE, main = sprintf("%s distribution's probability density function\n using %s", dist, word2),
        xlab = "value", ylab = "density")
   curve(fm(x, ...), add=TRUE, col = "blue")
 }
 
-cdf <- function(y, dist, ..., word, word2) {
+cdf <- function(y, dist, ..., word2) {
   Fm <- eval(parse(text = str_c("p", dist, sep = "")))
-  plot(ecdf(y), main = sprintf("Cumulative distribution function for %s \n distribution using %s", word, word2),
+  plot(ecdf(y), main = sprintf("Cumulative distribution function for %s \n distribution using %s", dist, word2),
        xlab = "value", ylab = "probability")
   curve(Fm(x, ...), add=TRUE, col = "blue")
 }
 
-qplot <- function(gh,dist, ..., word, word2) {
+qplot <- function(gh,dist, ..., word2) {
   qm <- eval(parse(text = str_c("q", dist, sep = "")))
   rm <- eval(parse(text = str_c("r", dist, sep = "")))
   Y <- rm(1000, ...)
   ps <- ppoints(1000)
   theoretical <- qm(ps, ...)
   sample <- quantile(Y, ps)
-  plot(theoretical, sample, main = sprintf("QQPlot for %s distribution\n using %s", word, word2),
+  plot(theoretical, sample, main = sprintf("QQPlot for %s distribution\n using %s", dist, word2),
        col = "blue")
   abline(0,1)
 }
 
-med_est <- function(dist,...,  word, word2) {
+med_est <- function(dist,..., word2) {
   qm <- eval(parse(text = str_c("q", dist, sep = "")))
   val <- qm(0.5, ...)
-  sprintf("The median of the estimated distribution under %s distribution using %s is %.2f", word, word2, val)
+  sprintf("The median of the estimated distribution under %s distribution using %s is %.2f", dist, word2, val)
 }
 
-med_sample <- function(dist, ..., word, word2) {
+med_sample <- function(dist, ..., word2) {
   rm <- eval(parse(text = str_c("r", dist, sep = "")))
   q <- c()
   for (i in 1:1000) {
     n <- rm(1000, ...)
     q[i] <- quantile(n, 0.5)
   }
-  hist(q, freq=FALSE, main = sprintf("Histogram of the median of %s sampling\n distribution using %s", word, word2), xlab = "value", ylab = "density")
+  hist(q, freq=FALSE, main = sprintf("Histogram of the median of %s sampling\n distribution using %s", dist, word2), xlab = "value", ylab = "density")
 }
 
-mid_95 <- function(dist, ..., word, word2) {
+mid_95 <- function(dist, ..., word2) {
   rm <- eval(parse(text = str_c("r", dist, sep = "")))
   n <- rm(1000, ...)
   l <- quantile(n, 0.025)
   h <- quantile(n, 0.975)
-  sprintf("The middle 95 percent of the sampling distribution for %s distribution begins from %.2f and ends at %.2f using %s", word, l, h, word2)
+  sprintf("The middle 95 percent of the sampling distribution for %s distribution begins from %.2f and ends at %.2f using %s", dist, l, h, word2)
 }
 ```
 
@@ -128,42 +128,46 @@ mom_sd <- sqrt(var(gh))
 
 ```{r, fig.height = 7, fig.width = 10}
 par(mfrow = c(1,2))
-pdf(gh, "norm", mean = mle_mean, sd = mle_sd, word = "normal", word2 = "mle")
-pdf(gh, "norm", mean = mom_mean, sd = mom_sd, word = "normal", word2 = "mom")
+pdf(gh, "norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
+pdf(gh, "norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
 ```
 
 
 ```{r, fig.height = 7, fig.width = 10}
+pdf_cdf(pdf,gh,"norm", mean = mle_mean)
+```
+
+```{r, fig.height = 7, fig.width = 10}
 par(mfrow = c(1,2))
-cdf(gh, "norm", mean = mle_mean, sd = mle_sd, word = "normal", word2 = "mle")
-cdf(gh, "norm", mean = mom_mean, sd = mom_sd, word = "normal", word2 = "mom")
+cdf(gh, "norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
+cdf(gh, "norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
 ```
 
 ```{r,fig.height = 7, fig.width = 10}
 par(mfrow = c(1,2))
-qplot(dist = "norm", mean = mle_mean, sd = mle_sd, word = "normal", word2 = "mle")
-qplot(dist = "norm", mean = mom_mean, sd = mom_sd, word = "normal", word2 = "mom")
+qplot(dist = "norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
+qplot(dist = "norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
 ```
 
 ### Estimated distribution's median
 
 ```{r}
-med_est(dist="norm", mean = mle_mean, sd = mle_sd, word = "normal", word2 = "mle")
-med_est(dist="norm", mean = mom_mean, sd = mom_sd, word = "normal", word2 = "mom")
+med_est(dist="norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
+med_est(dist="norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
 ```
 
 ### Median Sampling distribution
 
 ```{r, fig.width=10,fig.height=7}
-med_sample(dist="norm", mean = mle_mean, sd = mle_sd, word = "normal", word2 = "mle")
-med_sample(dist="norm", mean = mom_mean, sd = mom_sd, word = "normal", word2 = "mom")
+med_sample(dist="norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
+med_sample(dist="norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
 ```
 
 ### Range of Middle 95% of sampling distribution
 
 ```{r}
-mid_95(dist="norm", mean=mle_mean, sd =mle_sd, word="normal", word2="mle")
-mid_95(dist="norm", mean=mom_mean, sd =mom_sd, word="normal", word2="mom")
+mid_95(dist="norm", mean=mle_mean, sd =mle_sd, word2="mle")
+mid_95(dist="norm", mean=mom_mean, sd =mom_sd, word2="mom")
 ```
 
 ## Gamma Distribution
@@ -195,81 +199,119 @@ mom_scale <- v/m
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
-pdf(gh, "gamma", shape=mle_shape, scale = mle_scale, word = "gamma", word2 = "mle")
-pdf(gh, "gamma", shape=mom_shape, scale = mom_shape, word = "gamma", word2 = "mom")
+pdf(gh, "gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
+pdf(gh, "gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
-cdf(gh, "gamma", shape=mle_shape, scale = mle_scale, word = "gamma", word2 = "mle")
-cdf(gh, "gamma", shape=mom_shape, scale = mom_shape, word = "gamma", word2 = "mom")
+cdf(gh, "gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
+cdf(gh, "gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
-qplot(dist="gamma", shape=mle_shape, scale = mle_scale, word = "gamma", word2 = "mle")
-qplot(dist="gamma", shape=mom_shape, scale = mom_shape, word = "gamma", word2 = "mom")
+qplot(dist="gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
+qplot(dist="gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
 ### Estimated distribution's median
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
-med_est(dist="gamma", shape=mle_shape, scale = mle_scale, word = "gamma", word2 = "mle")
-med_est(dist="gamma", shape=mom_shape, scale = mom_shape, word = "gamma", word2 = "mom")
+med_est(dist="gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
+med_est(dist="gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
 ### Median Sampling distribution
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
-med_sample(dist="gamma", shape=mle_shape, scale = mle_scale, word = "gamma", word2 = "mle")
-med_sample(dist="gamma", shape=mom_shape, scale = mom_shape, word = "gamma", word2 = "mom")
+med_sample(dist="gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
+med_sample(dist="gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
 ### Range of Middle 95% of sampling distribution
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
-mid_95(dist="gamma", shape=mle_shape, scale = mle_scale, word = "gamma", word2 = "mle")
-mid_95(dist="gamma", shape=mom_shape, scale = mom_shape, word = "gamma", word2 = "mom")
+mid_95(dist="gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
+mid_95(dist="gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
+
 ## Weibull Distribution
 
 ### Parameter Estimation
 
 ```{r}
+nLL <- function(shape, scale){
+  fm <- dist_n("weibull")
+  fs <- fm(
+        x = gh
+      , shape=shape
+      , scale=scale
+      , log = TRUE
+    ) 
+  -sum(fs)
+}
+fit <- mle(nLL, start = list(shape=1,scale=1),method = "L-BFGS-B", 
+           lower = c(0, 0.01))
+mle_shape <- coef(fit)[1]
+mle_scale <- coef(fit)[2]
+m <- mean(gh)
+v <- var(gh)
+mom_shape <- 6.3478
+mom_scale <- 6.1516
 ```
 
 ### Estimated and Empirical distributions' comparison
 
-```{r}
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+pdf(gh, "weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
+pdf(gh, "weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
 
-```{r}
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+cdf(gh, "weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
+cdf(gh, "weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
-```{r}
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+qplot(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
+qplot(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
 ### Estimated distribution's median
 
-```{r}
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+med_est(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
+med_est(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
 ### Median Sampling distribution
 
-```{r}
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+med_sample(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
+med_sample(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
 ### Range of Middle 95% of sampling distribution
 
-```{r}
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+mid_95(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
+mid_95(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
 # Conclusion
+
 
 ```{r}
 nLL <- function(shape, scale){

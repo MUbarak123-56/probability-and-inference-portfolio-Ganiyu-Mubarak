@@ -1,0 +1,304 @@
+---
+title: "Modeling the unknown distribution with maximum likelihood and method of moments"
+author: "Mubarak Ganiyu"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: yes
+    number_sections: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r global options, include = FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
+```
+
+```{r, include = FALSE}
+library(tidyverse)
+Hmisc::getHdata(nhgh)
+library(stats4)
+d1 <- nhgh %>% 
+  filter(sex == "female") %>% 
+  filter(age >= 18) %>% 
+  select(gh, ht) %>% 
+  filter(1:n()<=1000)
+gh <- d1$gh
+ht <- d1$ht
+```
+
+# Introduction
+
+
+
+# Methods
+
+```{r}
+#  fm <- eval(parse(text = str_c("d", dist, sep = "")))
+dist_n <- function(dist) {
+  eval(parse(text = str_c("d", dist, sep = "")))
+}
+ll <- function(shape, scale) {
+  fm <- dist_n("gamma")
+  sum(-log(fm(gh,shape,scale)))
+}
+fit <- mle(ll, start = list(shape=1,scale=1),method = "L-BFGS-B", 
+           lower = c(0, 0.01))
+pdf <- function(y, dist, ..., word, word2) {
+  fm <- eval(parse(text = str_c("d", dist, sep = "")))
+  hist(y,freq=FALSE, main = sprintf("%s distribution's probability density function\n using %s", word, word2),
+       xlab = "value", ylab = "density")
+  curve(fm(x, ...), add=TRUE, col = "blue")
+}
+
+cdf <- function(y, dist, ..., word, word2) {
+  Fm <- eval(parse(text = str_c("p", dist, sep = "")))
+  plot(ecdf(y), main = sprintf("Cumulative distribution function for %s \n distribution using %s", word, word2),
+       xlab = "value", ylab = "probability")
+  curve(Fm(x, ...), add=TRUE, col = "blue")
+}
+
+qplot <- function(gh,dist, ..., word, word2) {
+  qm <- eval(parse(text = str_c("q", dist, sep = "")))
+  rm <- eval(parse(text = str_c("r", dist, sep = "")))
+  Y <- rm(1000, ...)
+  ps <- ppoints(1000)
+  theoretical <- qm(ps, ...)
+  sample <- quantile(Y, ps)
+  plot(theoretical, sample, main = sprintf("QQPlot for %s distribution\n using %s", word, word2),
+       col = "blue")
+  abline(0,1)
+}
+
+med_est <- function(dist,...,  word, word2) {
+  qm <- eval(parse(text = str_c("q", dist, sep = "")))
+  val <- qm(0.5, ...)
+  sprintf("The median of the estimated distribution under %s distribution using %s is %.2f", word, word2, val)
+}
+
+med_sample <- function(dist, ..., word, word2) {
+  rm <- eval(parse(text = str_c("r", dist, sep = "")))
+  q <- c()
+  for (i in 1:1000) {
+    n <- rm(1000, ...)
+    q[i] <- quantile(n, 0.5)
+  }
+  hist(q, freq=FALSE, main = sprintf("Histogram of the median of %s sampling\n distribution using %s", word, word2), xlab = "value", ylab = "density")
+}
+
+mid_95 <- function(dist, ..., word, word2) {
+  rm <- eval(parse(text = str_c("r", dist, sep = "")))
+  n <- rm(1000, ...)
+  l <- quantile(n, 0.025)
+  h <- quantile(n, 0.975)
+  sprintf("The middle 95 percent of the sampling distribution for %s distribution begins from %.2f and ends at %.2f using %s", word, l, h, word2)
+}
+```
+
+# Results
+
+
+## Normal Distribution
+
+### Parameter Estimation
+
+```{r}
+nLL <- function(mean, sd){
+  fm <- dist_n("norm")
+  fs <- fm(
+        x = gh
+      , mean = mean
+      , sd = sd
+      , log = TRUE
+    ) 
+  -sum(fs)
+}
+fit <- mle(nLL, start = list(mean=1,sd=1),method = "L-BFGS-B", 
+           lower = c(0, 0.01))
+mle_mean <- coef(fit)[1]
+mle_sd <- coef(fit)[2]
+mom_mean <- mean(gh)
+mom_sd <- sqrt(var(gh))
+```
+
+### Estimated and Empirical distributions' comparison
+
+```{r, fig.height = 7, fig.width = 10}
+par(mfrow = c(1,2))
+pdf(gh, "norm", mean = mle_mean, sd = mle_sd, word = "normal", word2 = "mle")
+pdf(gh, "norm", mean = mom_mean, sd = mom_sd, word = "normal", word2 = "mom")
+```
+
+
+```{r, fig.height = 7, fig.width = 10}
+par(mfrow = c(1,2))
+cdf(gh, "norm", mean = mle_mean, sd = mle_sd, word = "normal", word2 = "mle")
+cdf(gh, "norm", mean = mom_mean, sd = mom_sd, word = "normal", word2 = "mom")
+```
+
+```{r,fig.height = 7, fig.width = 10}
+par(mfrow = c(1,2))
+qplot(dist = "norm", mean = mle_mean, sd = mle_sd, word = "normal", word2 = "mle")
+qplot(dist = "norm", mean = mom_mean, sd = mom_sd, word = "normal", word2 = "mom")
+```
+
+### Estimated distribution's median
+
+```{r}
+med_est(dist="norm", mean = mle_mean, sd = mle_sd, word = "normal", word2 = "mle")
+med_est(dist="norm", mean = mom_mean, sd = mom_sd, word = "normal", word2 = "mom")
+```
+
+### Median Sampling distribution
+
+```{r, fig.width=10,fig.height=7}
+med_sample(dist="norm", mean = mle_mean, sd = mle_sd, word = "normal", word2 = "mle")
+med_sample(dist="norm", mean = mom_mean, sd = mom_sd, word = "normal", word2 = "mom")
+```
+
+### Range of Middle 95% of sampling distribution
+
+```{r}
+mid_95(dist="norm", mean=mle_mean, sd =mle_sd, word="normal", word2="mle")
+mid_95(dist="norm", mean=mom_mean, sd =mom_sd, word="normal", word2="mom")
+```
+
+## Gamma Distribution
+
+### Parameter Estimation
+
+```{r}
+nLL <- function(shape, scale){
+  fm <- dist_n("gamma")
+  fs <- fm(
+        x = gh
+      , shape=shape
+      , scale=scale
+      , log = TRUE
+    ) 
+  -sum(fs)
+}
+fit <- mle(nLL, start = list(shape=1,scale=1),method = "L-BFGS-B", 
+           lower = c(0, 0.01))
+mle_shape <- coef(fit)[1]
+mle_scale <- coef(fit)[2]
+m <- mean(gh)
+v <- var(gh)
+mom_shape <- m^2/v
+mom_scale <- v/m
+```
+
+### Estimated and Empirical distributions' comparison
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+pdf(gh, "gamma", shape=mle_shape, scale = mle_scale, word = "gamma", word2 = "mle")
+pdf(gh, "gamma", shape=mom_shape, scale = mom_shape, word = "gamma", word2 = "mom")
+```
+
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+cdf(gh, "gamma", shape=mle_shape, scale = mle_scale, word = "gamma", word2 = "mle")
+cdf(gh, "gamma", shape=mom_shape, scale = mom_shape, word = "gamma", word2 = "mom")
+```
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+qplot(dist="gamma", shape=mle_shape, scale = mle_scale, word = "gamma", word2 = "mle")
+qplot(dist="gamma", shape=mom_shape, scale = mom_shape, word = "gamma", word2 = "mom")
+```
+
+### Estimated distribution's median
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+med_est(dist="gamma", shape=mle_shape, scale = mle_scale, word = "gamma", word2 = "mle")
+med_est(dist="gamma", shape=mom_shape, scale = mom_shape, word = "gamma", word2 = "mom")
+```
+
+### Median Sampling distribution
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+med_sample(dist="gamma", shape=mle_shape, scale = mle_scale, word = "gamma", word2 = "mle")
+med_sample(dist="gamma", shape=mom_shape, scale = mom_shape, word = "gamma", word2 = "mom")
+```
+
+### Range of Middle 95% of sampling distribution
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+mid_95(dist="gamma", shape=mle_shape, scale = mle_scale, word = "gamma", word2 = "mle")
+mid_95(dist="gamma", shape=mom_shape, scale = mom_shape, word = "gamma", word2 = "mom")
+```
+## Weibull Distribution
+
+### Parameter Estimation
+
+```{r}
+```
+
+### Estimated and Empirical distributions' comparison
+
+```{r}
+```
+
+
+```{r}
+```
+
+```{r}
+```
+
+### Estimated distribution's median
+
+```{r}
+```
+
+### Median Sampling distribution
+
+```{r}
+```
+
+### Range of Middle 95% of sampling distribution
+
+```{r}
+```
+
+# Conclusion
+
+```{r}
+nLL <- function(shape, scale){
+  fs <- dgamma(
+        x = d1$gh
+      , shape = shape
+      , scale = scale
+      , log = TRUE
+    ) 
+  -sum(fs)
+}
+fit <- mle(
+    nLL
+  , start = list(shape = 1, scale = 1)
+  , method = "L-BFGS-B"
+  , lower = c(0, 0.01)
+)
+fit
+#ll <- function(a,b)
+#sum(-log(dbeta(bmi,a,b)))
+#z <- mle(minuslogl=ll,start=list(a=1,b=1)) 
+#z
+```
+
+```{r}
+h <- 8
+hist(d1$gh,breaks=20,freq=FALSE, main = sprintf("People %d", h))
+curve(dgamma(x, shape = coef(fit)[1], scale = coef(fit)[2]),add=TRUE, col = "blue")
+```
+
+```{r}
+```

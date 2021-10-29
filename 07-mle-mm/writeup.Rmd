@@ -32,12 +32,13 @@ ht <- d1$ht
 
 # Introduction
 
-
+Whenever a statistician needs to understand how a variable functions, they often plot a probability density function curve to understand how the variable is distributed. This often gives them a clue as to how to describe the curve. However, from time to time, statisticians will need to know if a distribution belongs to a specific type i.e. whether its distribution is lognormal, gamma, uniform, normal or others. Hence, with the aid of systems like Maximum Likelihood Estimate (MLE) and Method of moments (MOM), one can clearly try map behavior of different distributions onto the original distribution to figure out which family of distributions that the variable belongs to. This tutorial is focused on showcasing how to use MLE and MOM to model the distribution of both Glycohemoglobin and Adult Female heights. Technically speaking, a statistician will begin by plotting a distribution of the probability density function of any of the two variables stated above. Once that is done, the statistician will evaluate the curve to intuitively figure out which types of distribution it exhibits. Then, the statistician will go on to use either MLE or MOM to estimate parameters that can be used to build the estimated probability density function of the distributions in order to draw any similar connection to the empirical distribution of the variable. The distribution that showcases the closest similarity to the empirical distribution of Glycohemoglobin or Adult Female heights will be selected for the appropriate variable.
 
 # Methods
 
+The code chunk below showcases an example of how MLE is used to estimate the parameters that can be used to model a distribution. It utilizes numerous parameters such as shape and scale while leveraging the gamma distribution to calculate values for those parameters that can be used to model the behavior of the original distributions.
+
 ```{r}
-#  fm <- eval(parse(text = str_c("d", dist, sep = "")))
 dist_n <- function(dist) {
   eval(parse(text = str_c("d", dist, sep = "")))
 }
@@ -47,9 +48,43 @@ ll <- function(shape, scale) {
 }
 fit <- mle(ll, start = list(shape=1,scale=1),method = "L-BFGS-B", 
            lower = c(0, 0.01))
-pdf <- function(y, dist, ..., word, word2) {
+fit
+```
+
+As it can be observed the shape above is estimated to be `r coef(fit)[1]` and the scale is also estimated as `r coef(fit)[2]`.
+
+The code chunk below showcases an example of how MOM is used to estimate the parameters that can be used to model a distribution. It utilizes numerous parameters such as shape and scale while leveraging the gamma distribution to calculate values for those parameters that can be used to model the behavior of the original distributions.
+
+```{r}
+m <- mean(gh)
+v <- var(gh)
+mom_shape <- m^2/v
+mom_scale <- v/m
+m
+v
+mom_shape
+mom_scale
+```
+
+Here, the MOM estimated the values of shape to be `r mom_shape` and scale to be `r mom_scale`. Here is how it is calculated.
+
+$$E(X)=shape*scale$$
+$$Var(X)=shape*scale^2$$
+$$shape=E(X) \div scale$$
+$$Var(X)=E(X)*scale$$
+$$scale=Var(X) \div E(X)$$
+$$E(X)=shape*(Var(X) \div E(X))$$
+$$shape=E(X)^2/Var(X)$$
+Hence, shape and scale are calculated as:
+$$shape=5.72^2 \div 1.10==29.6$$
+$$shape=1.10 \div 5.72==0.19$$
+
+Multiple functions were created to showcase the discrepancies between using MLE and MOM to model the behavior of the variables. The `pdf` function uses the variable as well as the distribution and its parameters to plot the estimated distribution on the empirical distribution. This will provide people with the ability to discern if a curve fits well with the original distribution. The `cdf` function is similar to the `pdf` function but it is more interested in highlighting any similarity between the estimated and empirical distribution. The `qplot` function is interested in seeing how the quantiles of both the theoretical and sampling distributions are similar. Then, the `med_est` function was used to estimate the median from the estimated distribution. The `med_sample` function modeled the distribution of the median sampling distribution, in order to showcase how the median varies under simulation. Finally, the `mid_95` function captures the range of the middle 95% of values in the variable. For each one of the functions above, the MLE output is compared to that of the MOM. 
+
+```{r}
+pdf <- function(y, dist, ..., word2) {
   fm <- eval(parse(text = str_c("d", dist, sep = "")))
-  hist(y,breaks=20,freq=FALSE, main = sprintf("%s distribution's probability density function\n using %s", dist, word2),
+  hist(y,breaks=100,freq=FALSE, main = sprintf("%s distribution's probability density function\n using %s", dist, word2),
        xlab = "value", ylab = "density")
   curve(fm(x, ...), add=TRUE, col = "blue")
 }
@@ -100,6 +135,7 @@ mid_95 <- function(dist, ..., word2) {
 
 # Results
 
+Below are the results of the outcomes of using MLE and MOM to model normal, gamma and weibull distributions of Glycohemoglobin in order to see which one of them works best.
 
 ## Normal Distribution
 
@@ -132,10 +168,6 @@ pdf(gh, "norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
 pdf(gh, "norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
 ```
 
-
-```{r, fig.height = 7, fig.width = 10}
-pdf_cdf(pdf,gh,"norm", mean = mle_mean)
-```
 
 ```{r, fig.height = 7, fig.width = 10}
 par(mfrow = c(1,2))
@@ -312,35 +344,4 @@ mid_95(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 
 # Conclusion
 
-
-```{r}
-nLL <- function(shape, scale){
-  fs <- dgamma(
-        x = d1$gh
-      , shape = shape
-      , scale = scale
-      , log = TRUE
-    ) 
-  -sum(fs)
-}
-fit <- mle(
-    nLL
-  , start = list(shape = 1, scale = 1)
-  , method = "L-BFGS-B"
-  , lower = c(0, 0.01)
-)
-fit
-#ll <- function(a,b)
-#sum(-log(dbeta(bmi,a,b)))
-#z <- mle(minuslogl=ll,start=list(a=1,b=1)) 
-#z
-```
-
-```{r}
-h <- 8
-hist(d1$gh,breaks=20,freq=FALSE, main = sprintf("People %d", h))
-curve(dgamma(x, shape = coef(fit)[1], scale = coef(fit)[2]),add=TRUE, col = "blue")
-```
-
-```{r}
-```
+MLE and MOM are two great systems for modeling the behavior of a variable's distribution when unclear about how the variable is distributed. In the case of this deliverable, we discovered that MLE is designed to figure out a way to fit the estimated distribution on the empirical distribution. However, MOM's formulaic approach is created in such a way that not all the estimated distributions will fit perfectly well with the empirical distribtuion. Hence, it is a better choice if one is trying to figure out the optimal distribution for describing a variable. When working with MLE or MOM, be careful to take the messages highlighted above into account.

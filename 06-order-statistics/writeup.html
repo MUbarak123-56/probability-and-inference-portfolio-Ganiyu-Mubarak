@@ -11,7 +11,7 @@
 
 <meta name="author" content="Mubarak Ganiyu" />
 
-<meta name="date" content="2021-10-22" />
+<meta name="date" content="2021-10-29" />
 
 <title>Which quantiles of a continuous distribution can one estimate with more precision?</title>
 
@@ -243,7 +243,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Which quantiles of a continuous distribution can one estimate with more precision?</h1>
 <h4 class="author">Mubarak Ganiyu</h4>
-<h4 class="date">October 22, 2021</h4>
+<h4 class="date">October 29, 2021</h4>
 
 </div>
 
@@ -271,7 +271,7 @@ qorder &lt;- function(p) {
   r &lt;- curve(porder(x),-5,5)
   d &lt;- data.frame(x = r$x, y = r$y)
   d &lt;- d %&gt;% 
-    filter(y &gt;= 0.01 &amp; y &lt;= 0.999)
+    filter(y &gt;= 0.005 &amp; y &lt;= 0.995)
   n &lt;- curve(porder(x),min(d$x), max(d$x))
   m &lt;- mean(n$x)
   sd &lt;- sd(n$x)
@@ -349,15 +349,15 @@ ggplot(n) +
 <p>Q: One very common way to compare a random sample to a theoretical candidate distribution is the QQ plot. It is created by plotting quantiles of the theoretical distribution on the x-axis and empirical quantiles from the sample on the y-axis.</p>
 <pre class="r"><code>b &lt;- c()
 set.seed(42)
-for (i in 1:99) {
+for (i in 1:199) {
   n &lt;- rnorm(200, mean = 0, sd= 1)
   b[i] &lt;- quantile(n, 0.5)
 }
 b &lt;- sort(b)
-p &lt;- seq(0.01,0.99, by = 0.01)
+p &lt;- seq(0.005,0.995, by = 0.005)
 d &lt;- qorder(p)</code></pre>
 <pre class="r"><code>g &lt;- cbind(d, b)
-x &lt;- seq(-0.25,0.25, by = ((0.5)/(99 - 1)))
+x &lt;- seq(-0.25,0.25, by = ((0.5)/(199 - 1)))
 y &lt;- x</code></pre>
 <pre class="r"><code>ggplot(g) +
   geom_point(aes(x = q, y = b), col = &quot;red&quot;) +
@@ -395,7 +395,7 @@ qorder &lt;- function(p,k) {
   r &lt;- curve(porder(x,k),-5,5)
   d &lt;- data.frame(x = r$x, y = r$y)
   d &lt;- d %&gt;% 
-    filter(y &gt;= 0.01 &amp; y &lt;= 0.999)
+    filter(y &gt;= 0.005 &amp; y &lt;= 0.995)
   n &lt;- curve(porder(x,k),min(d$x), max(d$x))
   m &lt;- mean(n$x)
   sd &lt;- sd(n$x)
@@ -409,15 +409,15 @@ qorder &lt;- function(p,k) {
 <p>Q: Generate the QQ plot for simulated data from the sampling distribution of the sample max and the theoretical largest order statistic distribution.</p>
 <pre class="r"><code>b &lt;- c()
 set.seed(0)
-for (i in 1:99) {
+for (i in 1:199) {
   n &lt;- rnorm(200, mean = 0, sd= 1)
   b[i] &lt;- quantile(n, 0.99)
 }
 b &lt;- sort(b)
-p &lt;- seq(0.01, 0.99, by = 0.01)
+p &lt;- seq(0.005, 0.995, by = 0.005)
 d &lt;- qorder(p, 200)</code></pre>
 <pre class="r"><code>g &lt;- cbind(d, b)
-x &lt;- seq(1.5,3, by = ((1.5)/(99 - 1)))
+x &lt;- seq(1.5,3, by = ((1.5)/(199 - 1)))
 y &lt;- x</code></pre>
 <pre class="r"><code>ggplot(g) +
   geom_point(aes(x = q, y = b), col = &quot;red&quot;) +
@@ -446,16 +446,16 @@ porder &lt;- function(x,k, dist, ...) {
 
 qorder &lt;- function(p, k, dist, ...) {
   qm &lt;- eval(parse(text = str_c(&quot;q&quot;, dist, sep = &quot;&quot;)))
-  r &lt;- curve(porder(x,k),-5,5)
+  r &lt;- curve(porder(x,k,dist,...),-5,5)
   d &lt;- data.frame(x = r$x, y = r$y)
   d &lt;- d %&gt;% 
     filter(y &gt;= 0.01 &amp; y &lt;= 0.999)
-  n &lt;- curve(porder(x,k),min(d$x), max(d$x))
+  n &lt;- curve(porder(x,k,dist,...),min(d$x), max(d$x))
   m &lt;- mean(n$x)
   sd &lt;- sd(n$x)
   q &lt;- c()
   for (i in seq_along(p)) {
-    q[i] &lt;- qm(p[i], ...)
+    q[i] &lt;- qm(p[i], mean = m, sd = sd)
   }
   df &lt;- data.frame(p = p, q = q)
   return(df)

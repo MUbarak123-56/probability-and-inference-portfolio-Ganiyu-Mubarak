@@ -46,7 +46,7 @@ qorder <- function(p) {
   r <- curve(porder(x),-5,5)
   d <- data.frame(x = r$x, y = r$y)
   d <- d %>% 
-    filter(y >= 0.01 & y <= 0.999)
+    filter(y >= 0.005 & y <= 0.995)
   n <- curve(porder(x),min(d$x), max(d$x))
   m <- mean(n$x)
   sd <- sd(n$x)
@@ -151,15 +151,15 @@ Q: One very common way to compare a random sample to a theoretical candidate dis
 ```{r, fig.show='hide'}
 b <- c()
 set.seed(42)
-for (i in 1:99) {
+for (i in 1:199) {
   n <- rnorm(200, mean = 0, sd= 1)
   b[i] <- quantile(n, 0.5)
 }
 b <- sort(b)
-p <- seq(0.01,0.99, by = 0.01)
+p <- seq(0.005,0.995, by = 0.005)
 d <- qorder(p)
 g <- cbind(d, b)
-x <- seq(-0.25,0.25, by = ((0.5)/(99 - 1)))
+x <- seq(-0.25,0.25, by = ((0.5)/(199 - 1)))
 y <- x
 ```
 
@@ -206,7 +206,7 @@ qorder <- function(p,k) {
   r <- curve(porder(x,k),-5,5)
   d <- data.frame(x = r$x, y = r$y)
   d <- d %>% 
-    filter(y >= 0.01 & y <= 0.999)
+    filter(y >= 0.005 & y <= 0.995)
   n <- curve(porder(x,k),min(d$x), max(d$x))
   m <- mean(n$x)
   sd <- sd(n$x)
@@ -224,15 +224,15 @@ Q: Generate the QQ plot for simulated data from the sampling distribution of the
 ```{r, fig.show='hide'}
 b <- c()
 set.seed(0)
-for (i in 1:99) {
+for (i in 1:199) {
   n <- rnorm(200, mean = 0, sd= 1)
   b[i] <- quantile(n, 0.99)
 }
 b <- sort(b)
-p <- seq(0.01, 0.99, by = 0.01)
+p <- seq(0.005, 0.995, by = 0.005)
 d <- qorder(p, 200)
 g <- cbind(d, b)
-x <- seq(1.5,3, by = ((1.5)/(99 - 1)))
+x <- seq(1.5,3, by = ((1.5)/(199 - 1)))
 y <- x
 ```
 
@@ -268,16 +268,16 @@ porder <- function(x,k, dist, ...) {
 
 qorder <- function(p, k, dist, ...) {
   qm <- eval(parse(text = str_c("q", dist, sep = "")))
-  r <- curve(porder(x,k),-5,5)
+  r <- curve(porder(x,k,dist,...),-5,5)
   d <- data.frame(x = r$x, y = r$y)
   d <- d %>% 
     filter(y >= 0.01 & y <= 0.999)
-  n <- curve(porder(x,k),min(d$x), max(d$x))
+  n <- curve(porder(x,k,dist,...),min(d$x), max(d$x))
   m <- mean(n$x)
   sd <- sd(n$x)
   q <- c()
   for (i in seq_along(p)) {
-    q[i] <- qm(p[i], ...)
+    q[i] <- qm(p[i], mean = m, sd = sd)
   }
   df <- data.frame(p = p, q = q)
   return(df)

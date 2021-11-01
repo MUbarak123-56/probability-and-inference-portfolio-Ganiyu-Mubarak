@@ -84,7 +84,7 @@ Multiple functions were created to showcase the discrepancies between using MLE 
 ```{r}
 pdf <- function(y, dist, ..., word2) {
   fm <- eval(parse(text = str_c("d", dist, sep = "")))
-  hist(y,breaks=100,freq=FALSE, main = sprintf("%s distribution's probability density function\n using %s", dist, word2),
+  hist(y,breaks=20,freq=FALSE, main = sprintf("%s distribution's probability density function\n using %s", dist, word2),
        xlab = "value", ylab = "density")
   curve(fm(x, ...), add=TRUE, col = "blue")
 }
@@ -135,11 +135,13 @@ mid_95 <- function(dist, ..., word2) {
 
 # Results
 
-Below are the results of the outcomes of using MLE and MOM to model normal, gamma and weibull distributions of Glycohemoglobin in order to see which one of them works best.
+Below are the results of the outcomes of using MLE and MOM to model normal, gamma and weibull distributions of both Glycohemoglobin and Heights of Adult Females in order to see which of the distributions of them works best for both variables.
 
-## Normal Distribution
+## Glycohaemoglobin
 
-### Parameter Estimation
+### Normal Distribution
+
+#### Parameter Estimation
 
 ```{r}
 nLL <- function(mean, sd){
@@ -160,7 +162,7 @@ mom_mean <- mean(gh)
 mom_sd <- sqrt(var(gh))
 ```
 
-### Estimated and Empirical distributions' comparison
+#### Estimated and Empirical distributions' comparison
 
 ```{r, fig.height = 7, fig.width = 10}
 par(mfrow = c(1,2))
@@ -181,30 +183,30 @@ qplot(dist = "norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
 qplot(dist = "norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
 ```
 
-### Estimated distribution's median
+#### Estimated distribution's median
 
 ```{r}
 med_est(dist="norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
 med_est(dist="norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
 ```
 
-### Median Sampling distribution
+#### Median Sampling distribution
 
 ```{r, fig.width=10,fig.height=7}
 med_sample(dist="norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
 med_sample(dist="norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
 ```
 
-### Range of Middle 95% of sampling distribution
+#### Range of Middle 95% of sampling distribution
 
 ```{r}
 mid_95(dist="norm", mean=mle_mean, sd =mle_sd, word2="mle")
 mid_95(dist="norm", mean=mom_mean, sd =mom_sd, word2="mom")
 ```
 
-## Gamma Distribution
+### Gamma Distribution
 
-### Parameter Estimation
+#### Parameter Estimation
 
 ```{r}
 nLL <- function(shape, scale){
@@ -227,7 +229,7 @@ mom_shape <- m^2/v
 mom_scale <- v/m
 ```
 
-### Estimated and Empirical distributions' comparison
+#### Estimated and Empirical distributions' comparison
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
@@ -248,7 +250,7 @@ qplot(dist="gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
 qplot(dist="gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
-### Estimated distribution's median
+#### Estimated distribution's median
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
@@ -256,7 +258,7 @@ med_est(dist="gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
 med_est(dist="gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
-### Median Sampling distribution
+#### Median Sampling distribution
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
@@ -264,7 +266,7 @@ med_sample(dist="gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
 med_sample(dist="gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
-### Range of Middle 95% of sampling distribution
+#### Range of Middle 95% of sampling distribution
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
@@ -272,9 +274,9 @@ mid_95(dist="gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
 mid_95(dist="gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
-## Weibull Distribution
+### Weibull Distribution
 
-### Parameter Estimation
+#### Parameter Estimation
 
 ```{r}
 nLL <- function(shape, scale){
@@ -297,7 +299,7 @@ mom_shape <- 6.3478
 mom_scale <- 6.1516
 ```
 
-### Estimated and Empirical distributions' comparison
+#### Estimated and Empirical distributions' comparison
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
@@ -318,7 +320,7 @@ qplot(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
 qplot(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
-### Estimated distribution's median
+#### Estimated distribution's median
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
@@ -326,7 +328,7 @@ med_est(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
 med_est(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
-### Median Sampling distribution
+#### Median Sampling distribution
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
@@ -334,13 +336,222 @@ med_sample(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
 med_sample(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
-### Range of Middle 95% of sampling distribution
+#### Range of Middle 95% of sampling distribution
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
 mid_95(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
 mid_95(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
+
+## Height
+
+### Normal Distribution
+
+#### Parameter Estimation
+
+```{r}
+nLL <- function(mean, sd){
+  fm <- dist_n("norm")
+  fs <- fm(
+        x = ht
+      , mean = mean
+      , sd = sd
+      , log = TRUE
+    ) 
+  -sum(fs)
+}
+fit <- mle(nLL, start = list(mean=1,sd=1),method = "L-BFGS-B", 
+           lower = c(0, 0.01))
+mle_mean <- coef(fit)[1]
+mle_sd <- coef(fit)[2]
+mom_mean <- mean(ht)
+mom_sd <- sqrt(var(ht))
+```
+
+#### Estimated and Empirical distributions' comparison
+
+```{r, fig.height = 7, fig.width = 10}
+par(mfrow = c(1,2))
+pdf(ht, "norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
+pdf(ht, "norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
+```
+
+
+```{r, fig.height = 7, fig.width = 10}
+par(mfrow = c(1,2))
+cdf(ht, "norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
+cdf(ht, "norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
+```
+
+```{r,fig.height = 7, fig.width = 10}
+par(mfrow = c(1,2))
+qplot(dist = "norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
+qplot(dist = "norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
+```
+
+#### Estimated distribution's median
+
+```{r}
+med_est(dist="norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
+med_est(dist="norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
+```
+
+#### Median Sampling distribution
+
+```{r, fig.width=10,fig.height=7}
+med_sample(dist="norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
+med_sample(dist="norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
+```
+
+#### Range of Middle 95% of sampling distribution
+
+```{r}
+mid_95(dist="norm", mean=mle_mean, sd =mle_sd, word2="mle")
+mid_95(dist="norm", mean=mom_mean, sd =mom_sd, word2="mom")
+```
+
+### Gamma Distribution
+
+#### Parameter Estimation
+
+```{r}
+nLL <- function(shape, scale){
+  fm <- dist_n("gamma")
+  fs <- fm(
+        x = ht
+      , shape=shape
+      , scale=scale
+      , log = TRUE
+    ) 
+  -sum(fs)
+}
+fit <- mle(nLL, start = list(shape=1,scale=1),method = "L-BFGS-B", 
+           lower = c(0, 0.01))
+mle_shape <- coef(fit)[1]
+mle_scale <- coef(fit)[2]
+m <- mean(ht)
+v <- var(ht)
+mom_shape <- m^2/v
+mom_scale <- v/m
+```
+
+#### Estimated and Empirical distributions' comparison
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+pdf(ht, "gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
+pdf(ht, "gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
+```
+
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+cdf(ht, "gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
+cdf(ht, "gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
+```
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+qplot(dist="gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
+qplot(dist="gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
+```
+
+#### Estimated distribution's median
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+med_est(dist="gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
+med_est(dist="gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
+```
+
+#### Median Sampling distribution
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+med_sample(dist="gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
+med_sample(dist="gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
+```
+
+#### Range of Middle 95% of sampling distribution
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+mid_95(dist="gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
+mid_95(dist="gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
+```
+
+### Weibull Distribution
+
+#### Parameter Estimation
+
+```{r}
+nLL <- function(shape, scale){
+  fm <- dist_n("weibull")
+  fs <- fm(
+        x = ht
+      , shape=shape
+      , scale=scale
+      , log = TRUE
+    ) 
+  -sum(fs)
+}
+fit <- mle(nLL, start = list(shape=1,scale=1),method = "L-BFGS-B", 
+           lower = c(0, 0.01))
+mle_shape <- coef(fit)[1]
+mle_scale <- coef(fit)[2]
+mle_shape
+mle_scale
+m <- mean(ht)
+v <- var(ht)
+mom_shape <- 27.4971
+mom_scale <- 163.976
+```
+
+#### Estimated and Empirical distributions' comparison
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+pdf(ht, "weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
+pdf(ht, "weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
+```
+
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+cdf(ht, "weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
+cdf(ht, "weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
+```
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+qplot(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
+qplot(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
+```
+
+#### Estimated distribution's median
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+med_est(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
+med_est(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
+```
+
+#### Median Sampling distribution
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+med_sample(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
+med_sample(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
+```
+
+#### Range of Middle 95% of sampling distribution
+
+```{r,fig.width=10,fig.height=7}
+par(mfrow = c(1,2))
+mid_95(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
+mid_95(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
+``` 
 
 # Conclusion
 

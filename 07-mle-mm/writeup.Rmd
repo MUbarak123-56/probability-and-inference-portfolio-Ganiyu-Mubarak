@@ -51,7 +51,8 @@ fit <- mle(ll, start = list(shape=1,scale=1),method = "L-BFGS-B",
 fit
 ```
 
-As it can be observed the shape above is estimated to be `r coef(fit)[1]` and the scale is also estimated as `r coef(fit)[2]`.
+As it can be observed the shape above is estimated to be `r coef(fit)[1]` and the scale is also estimated as `r coef(fit)[2]`. For the other distributions such as normal and weibull, their parameters can be estimated by tweaking the `dist` argument in the mle function.
+
 
 The code chunk below showcases an example of how MOM is used to estimate the parameters that can be used to model a distribution. It utilizes numerous parameters such as shape and scale while leveraging the gamma distribution to calculate values for those parameters that can be used to model the behavior of the original distributions.
 
@@ -66,7 +67,12 @@ mom_shape
 mom_scale
 ```
 
-Here, the MOM estimated the values of shape to be `r mom_shape` and scale to be `r mom_scale`. Here is how it is calculated.
+Here, the MOM estimated the values of shape to be `r mom_shape` and scale to be `r mom_scale`. 
+
+The next three sections will focus on how MOM mathematically calculates the parameters for gamma, normal and weibull distributions with respect to the Glycohaemoglobin variable.
+
+**Gamma**
+The parameters for gamma distribution are shape and scale
 
 $$E(X)=shape*scale$$
 $$Var(X)=shape*scale^2$$
@@ -78,13 +84,37 @@ $$shape=E(X)^2/Var(X)$$
 Hence, shape and scale are calculated as:
 $$shape=5.72^2 \div 1.10==29.6$$
 $$shape=1.10 \div 5.72==0.19$$
+**Normal**
 
-Multiple functions were created to showcase the discrepancies between using MLE and MOM to model the behavior of the variables. The `pdf` function uses the variable as well as the distribution and its parameters to plot the estimated distribution on the empirical distribution. This will provide people with the ability to discern if a curve fits well with the original distribution. The `cdf` function is similar to the `pdf` function but it is more interested in highlighting any similarity between the estimated and empirical distribution. The `qplot` function is interested in seeing how the quantiles of both the theoretical and sampling distributions are similar. Then, the `med_est` function was used to estimate the median from the estimated distribution. The `med_sample` function modeled the distribution of the median sampling distribution, in order to showcase how the median varies under simulation. Finally, the `mid_95` function captures the range of the middle 95% of values in the variable. For each one of the functions above, the MLE output is compared to that of the MOM. 
+The normal distribution's parameters are mean and standard deviation.
+
+$$E(X)=mean$$
+$$Var(X)= SD^2$$
+$$mean=5.7246$$
+$$SD = \sqrt(Var(X))$$
+
+$$SD = 1.05$$
+
+**Weibull**
+The parameters for weibull distribution are shape and scale.
+Lambda represents scale, k represents shape.
+
+$$E(X)=\Lambda\Gamma(1 + (1/k))$$
+
+$$Var(X)=\Lambda^2\Gamma(1 + (2/k))-E(X)^2$$
+$$5.7246=\Lambda\Gamma(1 + (1/k))$$
+$$1.107= \Lambda^2\Gamma(1 + (2/k))-32.771$$
+Using simultaenous equations,
+
+$$\Lambda(scale) = 6.1516$$
+$$k(shape) = 6.3478$$
+
+Multiple functions were created to showcase the discrepancies between using MLE and MOM to model the behavior of the variables. The `pdf` function uses the variable as well as the distribution and its parameters to plot the estimated distribution on the empirical distribution. This will provide people with the ability to discern if a curve fits well with the original distribution. The `cdf` function is similar to the `pdf` function but it is more interested in highlighting any similarity between the estimated and empirical distribution. The `qplot` function is interested in seeing how the quantiles of both the theoretical and sampling distributions are similar. Then, the `med_est` function was used to estimate the median from the estimated distribution. The estimated median is calculated by obtaining median quantile of the distribution using the parameters obtained via MLE and MOM. Hence is done by using `q...(0.5, parameters)`. `...` could represent normal, gamma or weibull distribution and the parameters are inserted in the spot reserved for parameters. The `med_sample` function modeled the distribution of the median sampling distribution, in order to showcase how the median varies under simulation. This is done by running numerous trials that generate random values using the parameters collected from MLE and MOM. Then, the medians of all these trials are stored in a vector. The histogram of this vector of medians is plotted to showcase the median sampling distribution. Finally, the `mid_95` function captures the range of the middle 95% of values in the variable. This is a very important value to calculate because it gives us an idea as to where 95% of the population lie. For each one of the functions above, the MLE output is compared to that of the MOM.  
 
 ```{r}
 pdf <- function(y, dist, ..., word2) {
   fm <- eval(parse(text = str_c("d", dist, sep = "")))
-  hist(y,breaks=20,freq=FALSE, main = sprintf("%s distribution's probability density function\n using %s", dist, word2),
+  hist(y,freq=FALSE, main = sprintf("%s distribution's probability density function\n using %s", dist, word2),
        xlab = "value", ylab = "density")
   curve(fm(x, ...), add=TRUE, col = "blue")
 }
@@ -170,6 +200,7 @@ pdf(gh, "norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
 pdf(gh, "norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
 ```
 
+There is no significant difference between the fits of values generated via MLE and MOM. However, it seems like the histograms of the original values are very postively skewed in both cases. This stems from the fact that most of the original values for glycohaemoglobin lie between 5 and 6.
 
 ```{r, fig.height = 7, fig.width = 10}
 par(mfrow = c(1,2))
@@ -177,11 +208,15 @@ cdf(gh, "norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
 cdf(gh, "norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
 ```
 
+The two graphs are also very similar in this case and both the empirical and estimated distributions follow the same trends. However, the cdfs of the estimated distributions do not fit perfectly well on the ecdfs of the empirical values. 
+
 ```{r,fig.height = 7, fig.width = 10}
 par(mfrow = c(1,2))
 qplot(dist = "norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
 qplot(dist = "norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
 ```
+
+Although, the qqplot charts show slight deviations from one another in both charts, they fit perfectly well onto the `y=x` line on the charts.
 
 #### Estimated distribution's median
 
@@ -237,6 +272,7 @@ pdf(gh, "gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
 pdf(gh, "gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
+The mle chart on the left has the estimated gamma distribution drawing some semblance to the trajectory of the empirical distribution's histogram. However, the mom chart on the right draws no semblance to the one generated by the mle chart because the estimated distribution curve is no where to be found. 
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
@@ -244,11 +280,15 @@ cdf(gh, "gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
 cdf(gh, "gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
+The mle chart on the left has the estimated gamma distribution having a cdf function that slightly deviates from the ecdf of the empirical distribution's histogram. The same phenomenon observed above for the pdf can be noticed here for the cdf. The mom chart on the right differs from the one generated by the mle chart because the estimated distribution curve is no where to be found. 
+
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
 qplot(dist="gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
 qplot(dist="gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
+
+Looking at the values of the qqplot chart generated via the mom approach, it can be observed that the values are out of place. This explains why the cdf and the pdf curves above are no where to be found. 
 
 #### Estimated distribution's median
 
@@ -295,9 +335,11 @@ mle_shape <- coef(fit)[1]
 mle_scale <- coef(fit)[2]
 m <- mean(gh)
 v <- var(gh)
-mom_shape <- 6.3478
+# using the values in our methods above
+mom_shape <- 6.3478 
 mom_scale <- 6.1516
 ```
+
 
 #### Estimated and Empirical distributions' comparison
 
@@ -307,6 +349,8 @@ pdf(gh, "weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
 pdf(gh, "weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
+The two density curves generated by the estimated distributions of mle and mom are slightly different. The mom estimated curve has a fatter tail and is more positively skewed compared to that of the mle.Both curves do not fit perfectly well with the histogram 
+
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
@@ -314,11 +358,15 @@ cdf(gh, "weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
 cdf(gh, "weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
+The two cumulative distribution curves do not differ by much. There is a form of inconsistency between the estimated cdf and the empirical cdf of the two charts.
+
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
 qplot(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
 qplot(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
+
+The two qqplots generate roughly the same range of values. The qqplot of the mle generated chart has values from about 2 to 10 and the qqplot of the mom generated chart has values from abut 2 to 9. They also both fit well with the `y=x` line.
 
 #### Estimated distribution's median
 
@@ -344,7 +392,9 @@ mid_95(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
 mid_95(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
-## Height
+All the activities conducted above for the Glycohaemoglobin variable are repetead for the height of adult female variable in the next section.
+
+## Heights of Adult Female
 
 ### Normal Distribution
 
@@ -377,6 +427,7 @@ pdf(ht, "norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
 pdf(ht, "norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
 ```
 
+The charts above show that both mle and mom properly define the height of adult females variable. The density curves generated from the estimated parameters match the distribution created with the histogram.
 
 ```{r, fig.height = 7, fig.width = 10}
 par(mfrow = c(1,2))
@@ -384,11 +435,15 @@ cdf(ht, "norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
 cdf(ht, "norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
 ```
 
+The estimated cdfs created by both methods of estimation fit perfectly well with the empirical cdfs generated empirically. This fit is of high quality.
+
 ```{r,fig.height = 7, fig.width = 10}
 par(mfrow = c(1,2))
 qplot(dist = "norm", mean = mle_mean, sd = mle_sd, word2 = "mle")
 qplot(dist = "norm", mean = mom_mean, sd = mom_sd, word2 = "mom")
 ```
+
+The qqplots above are very similar. The quantile values only differ at both ends of the distribution. It can be observed that all the quantile values fit well with the `y = x` line.
 
 #### Estimated distribution's median
 
@@ -444,6 +499,7 @@ pdf(ht, "gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
 pdf(ht, "gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
+The gamma distribution's estimated probability density function fits well with the histogram in the mle chart. However, the mom estimated pdf is no where to be found in the mom chart. This is quite expected due to the fact that height is likely to be a normally distributed variable naturally. 
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
@@ -451,11 +507,15 @@ cdf(ht, "gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
 cdf(ht, "gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
+The mle chart shows that the cdf fits well with the ecdf, and the mom chart displays the same phenomenon observed above for the pdf. 
+
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
 qplot(dist="gamma", shape=mle_shape, scale = mle_scale, word2 = "mle")
 qplot(dist="gamma", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
+
+Upon observing the values of the quantile created by the mom, it can be inferred that the gamma distribution estimated parameters yielded absurd numbers for the quantile values. 
 
 #### Estimated distribution's median
 
@@ -500,10 +560,10 @@ fit <- mle(nLL, start = list(shape=1,scale=1),method = "L-BFGS-B",
            lower = c(0, 0.01))
 mle_shape <- coef(fit)[1]
 mle_scale <- coef(fit)[2]
-mle_shape
-mle_scale
 m <- mean(ht)
 v <- var(ht)
+# The process used to obtain shape and scale in the methods section was repeated here
+# to get the values of shape and scale
 mom_shape <- 27.4971
 mom_scale <- 163.976
 ```
@@ -516,6 +576,7 @@ pdf(ht, "weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
 pdf(ht, "weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
+Using the mle approach, it is easy to model the behaviour of the height variable quite accurately. However, the mom approach fails as it cannot generate any density curve.
 
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
@@ -523,11 +584,15 @@ cdf(ht, "weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
 cdf(ht, "weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
 
+It can be observed here that the same issue of a missing curve is observed for the mom chart. However, the mle chart shows that the cdf and the ecdf values differ on the low end. 
+
 ```{r,fig.width=10,fig.height=7}
 par(mfrow = c(1,2))
 qplot(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
 qplot(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 ```
+
+The mom approach via weibull distribution generated values that are not in line with the heights of adult females. Hence, it is a wrong approach to use to model the behaviour of adult female heights. The mle chart underestimated the values of female heights on the low end. Both fits are in line with the `y = x` line.
 
 #### Estimated distribution's median
 
@@ -551,8 +616,8 @@ med_sample(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
 par(mfrow = c(1,2))
 mid_95(dist="weibull", shape=mle_shape, scale = mle_scale, word2 = "mle")
 mid_95(dist="weibull", shape=mom_shape, scale = mom_shape, word2 = "mom")
-``` 
+```
 
 # Conclusion
 
-MLE and MOM are two great systems for modeling the behavior of a variable's distribution when unclear about how the variable is distributed. In the case of this deliverable, we discovered that MLE is designed to figure out a way to fit the estimated distribution on the empirical distribution. However, MOM's formulaic approach is created in such a way that not all the estimated distributions will fit perfectly well with the empirical distribtuion. Hence, it is a better choice if one is trying to figure out the optimal distribution for describing a variable. When working with MLE or MOM, be careful to take the messages highlighted above into account.
+MLE and MOM are two great systems for modeling the behavior of a variable's distribution when unclear about how the variable is distributed. In the case of this deliverable, we discovered that MLE is designed to figure out a way to fit the estimated distribution on the empirical distribution. However, MOM's formulaic approach is created in such a way that not all the estimated distributions will fit perfectly well with the empirical distribtuion. Hence, it is a better choice if one is trying to figure out the optimal distribution for describing a variable. When working with MLE or MOM, be careful to take the messages highlighted above into account. The optimal way to model the Glycohaemoglobin variable is via normal distribution given that both the mle and mom approach yield the same results, and it creates the curve that draws more of a semblance to the original distribution. The best way to model the height variable is via normal distribution as both approaches, mle and mom, create perfectly fitting curves and accurately generated values when compared to the distribution of the height variable.

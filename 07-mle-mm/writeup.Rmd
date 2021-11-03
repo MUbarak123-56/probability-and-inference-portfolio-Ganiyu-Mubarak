@@ -32,7 +32,7 @@ ht <- d1$ht
 
 # Introduction
 
-Whenever a statistician needs to understand how a variable functions, they often plot a probability density function curve to understand how the variable is distributed. This often gives them a clue as to how to describe the curve. However, from time to time, statisticians will need to know if a distribution belongs to a specific type i.e. whether its distribution is lognormal, gamma, uniform, normal or others. Hence, with the aid of systems like Maximum Likelihood Estimate (MLE) and Method of moments (MOM), one can clearly try map behavior of different distributions onto the original distribution to figure out which family of distributions that the variable belongs to. This tutorial is focused on showcasing how to use MLE and MOM to model the distribution of both Glycohemoglobin and Adult Female heights. Technically speaking, a statistician will begin by plotting a distribution of the probability density function of any of the two variables stated above. Once that is done, the statistician will evaluate the curve to intuitively figure out which types of distribution it exhibits. Then, the statistician will go on to use either MLE or MOM to estimate parameters that can be used to build the estimated probability density function of the distributions in order to draw any similar connection to the empirical distribution of the variable. The distribution that showcases the closest similarity to the empirical distribution of Glycohemoglobin or Adult Female heights will be selected for the appropriate variable.
+Whenever a statistician needs to understand how a variable functions, they often plot a probability density function curve to understand how the variable is distributed. This often gives them a clue as to how to describe the curve. However, from time to time, statisticians will need to know if a distribution belongs to a specific family of distribution i.e. whether its distribution is lognormal, gamma, uniform, normal or others. Hence, with the aid of systems like Maximum Likelihood Estimate (MLE) and Method of moments (MOM), one can clearly map behavior of different distributions onto the original distribution to figure out which family of distributions that the variable belongs to. This tutorial is focused on showcasing how to use MLE and MOM to model the distribution of both Glycohemoglobin and Adult Female heights. Technically speaking, a statistician will begin by plotting a distribution of the probability density function of any of the two variables stated above. Once that is done, the statistician will evaluate the curve to intuitively figure out which types of distribution it exhibits. Then, the statistician will go on to use either MLE or MOM to estimate parameters that can be used to build the estimated probability density function of the distributions in order to draw any similar connection to the empirical distribution of the variable. The distribution that showcases the closest similarity to the empirical distribution of Glycohemoglobin or Adult Female heights will be selected as the optimal one.
 
 # Methods
 
@@ -72,6 +72,7 @@ Here, the MOM estimated the values of shape to be `r mom_shape` and scale to be 
 The next three sections will focus on how MOM mathematically calculates the parameters for gamma, normal and weibull distributions with respect to the Glycohaemoglobin variable.
 
 **Gamma**
+
 The parameters for gamma distribution are shape and scale
 
 $$E(X)=shape*scale$$
@@ -96,6 +97,7 @@ $$SD = \sqrt(Var(X))$$
 $$SD = 1.05$$
 
 **Weibull**
+
 The parameters for weibull distribution are shape and scale.
 Lambda represents scale, k represents shape.
 

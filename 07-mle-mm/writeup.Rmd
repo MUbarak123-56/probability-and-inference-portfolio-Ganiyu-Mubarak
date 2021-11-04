@@ -32,27 +32,33 @@ ht <- d1$ht
 
 # Introduction
 
-Whenever a statistician needs to understand how a variable functions, they often plot a probability density function curve to understand how the variable is distributed. This often gives them a clue as to how to describe the curve. However, from time to time, statisticians will need to know if a distribution belongs to a specific family of distribution i.e. whether its distribution is lognormal, gamma, uniform, normal or others. Hence, with the aid of systems like Maximum Likelihood Estimate (MLE) and Method of moments (MOM), one can clearly map behavior of different distributions onto the original distribution to figure out which family of distributions that the variable belongs to. This tutorial is focused on showcasing how to use MLE and MOM to model the distribution of both Glycohemoglobin and Adult Female heights. Technically speaking, a statistician will begin by plotting a distribution of the probability density function of any of the two variables stated above. Once that is done, the statistician will evaluate the curve to intuitively figure out which types of distribution it exhibits. Then, the statistician will go on to use either MLE or MOM to estimate parameters that can be used to build the estimated probability density function of the distributions in order to draw any similar connection to the empirical distribution of the variable. The distribution that showcases the closest similarity to the empirical distribution of Glycohemoglobin or Adult Female heights will be selected as the optimal one.
+Whenever a statistician needs to understand how a variable functions, they often plot a probability density function curve to understand how the variable is distributed. This often gives them a clue as to how to describe the curve. However, from time to time, statisticians will need to know if a distribution belongs to a specific family of distribution i.e. whether its distribution is lognormal, gamma, uniform, normal or others. Hence, with the aid of systems like Maximum Likelihood Estimate (MLE) and Method of moments (MOM), one can clearly map behavior of different distributions onto the original distribution to figure out which family of distributions that the variable belongs to. This tutorial is focused on showcasing how to use MLE and MOM to model the distribution of both Glycohemoglobin and Adult Female heights. Technically speaking, a statistician will begin by plotting a distribution of the probability density function of any of the two variables stated above. Once that is done, the statistician will evaluate the curve to intuitively figure out which types of distribution it exhibits. Then, the statistician will go on to use either MLE or MOM to estimate parameters that can be used to build the estimated probability density function of the distributions in order to draw any similar connection to the empirical distribution of the variable. The distributions that showcases the closest similarity to the empirical distribution of Glycohemoglobin or Adult Female heights will be selected as the optimal ones.
 
 # Methods
 
 The code chunk below showcases an example of how MLE is used to estimate the parameters that can be used to model a distribution. It utilizes numerous parameters such as shape and scale while leveraging the gamma distribution to calculate values for those parameters that can be used to model the behavior of the original distributions.
 
+
 ```{r}
 dist_n <- function(dist) {
   eval(parse(text = str_c("d", dist, sep = "")))
 }
-ll <- function(shape, scale) {
+nLL <- function(shape, scale){
   fm <- dist_n("gamma")
-  sum(-log(fm(gh,shape,scale)))
+  fs <- dgamma(
+        x = gh
+      , shape = shape
+      , scale = scale
+      , log = TRUE
+    ) 
+  -sum(fs)
 }
-fit <- mle(ll, start = list(shape=1,scale=1),method = "L-BFGS-B", 
+fit <- mle(nLL, start = list(shape=1,scale=1),method = "L-BFGS-B", 
            lower = c(0, 0.01))
-fit
 ```
 
-As it can be observed the shape above is estimated to be `r coef(fit)[1]` and the scale is also estimated as `r coef(fit)[2]`. For the other distributions such as normal and weibull, their parameters can be estimated by tweaking the `dist` argument in the mle function.
 
+As it can be observed the shape above is estimated to be 40.7 and the scale is also estimated as 0.15. For the other distributions such as normal and weibull, their parameters can be estimated by tweaking the `dist` argument in the `dist_n` function.
 
 The code chunk below showcases an example of how MOM is used to estimate the parameters that can be used to model a distribution. It utilizes numerous parameters such as shape and scale while leveraging the gamma distribution to calculate values for those parameters that can be used to model the behavior of the original distributions.
 

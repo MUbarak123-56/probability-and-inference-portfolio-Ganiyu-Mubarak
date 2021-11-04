@@ -79,6 +79,8 @@ ggplot(n) +
   theme(plot.title = element_text(hjust=0.5))
 ```
 
+The probability density function of the range of possible medians via analytical approach shows that there is a better chance of getting 0 as the median which is quite accurate given that this is a normal distribution with a mean of 0 and a standard deviation of 1.
+
 Q: Write an R function that is the probability function for the median in this sample. Use the order statistic formula discussed in class. Generate a plot of the function.
 
 ```{r, fig.width = 10, fig.height = 7}
@@ -87,12 +89,14 @@ curve(porder(x), -0.4,0.4, col = "blue",
       xlab = "value",
       ylab = "probability")
 ```
+Upon evaluating the cumulative distribution function, it seems that it correctly showcases the cumulative probabilities of each potential outcome as the value corresponding to having an `F(X)` of 0 is -0.2 and the one corresponding to having an `F(X)` of 1 is 0.2. Both values are on the very end of the probability density functions.
 
 Q: Write an R function that is the quantile function for the median in this sample. (You have several options for how to write this function.) Generate a plot of the function.
 ```{r, fig.show='hide'}
 p <- seq(0.01, 0.99, by = 0.01)
 d <- qorder(p)
 ```
+
 
 ```{r, fig.width = 10, fig.height = 7}
 ggplot(d) +
@@ -103,6 +107,7 @@ ggplot(d) +
   theme_bw() +
   theme(plot.title= element_text(hjust=0.5))
 ```
+The quantile distribution function plot showcases an inverse output of the cumulative distribution plot. This is expected as the objective of using the quantile function is to figure out the values that correspond to certain percentiles on the cumulative distribution plot. Reviewing the y-axis, a range of -0.2 to 0.2 can be observed as the range of possibilities. This is expected according to the probability density function.
 
 Q: Simulate the sampling distribution for the median. Create a plot of the empirical CDF (ECDF). Overlay the plot of the ECDF with a plot of the CDF.
 
@@ -119,6 +124,8 @@ plot(p, main = "Cumulative distribution function of the median (100th order stat
       ylab = "density",xlim = c(-0.2,0.2))
 curve(porder(x), col = "blue", add = TRUE)
 ```
+
+In this chart, there is a slight deviation between the cdf generated via simulation and that built via analytics. However, the follow similar trends as they towards moving from zero to one. Generally, it seems like the simulation values are greater than those generated via analytics.
 
 Q: Using the simulated sampling distribution from the previous question, create a histogram (on the density scale). Overlay the histogram with a plot of the density function.
 
@@ -138,28 +145,30 @@ ggplot(n) +
   geom_histogram(aes(x = b,y=..density../10),bins = 10, color = "black", fill= "white") +
   geom_line(aes(x = x, y = y), color = "blue") +
   labs(title = "Probability density function of the median (100th order statistic) for both approaches",
-       x = "values", 
+      
+        x = "values", 
        y = "probability",
-       subtitle = "Blue is for analytic, black is for simulation") +
+       subtitle = "Blue is for analytics, black is for simulation") +
   theme_light() +
   theme(plot.title = element_text(hjust=0.5),
         plot.subtitle = element_text(hjust=0.5))
 ```
 
+It turns out that pdf created via the analytical approach exhibits the same behavior as the histogram built through the simulated approach. However, there are likely to be discrepancies between values as they do not fit on each other perfectly well.
 
 Q: One very common way to compare a random sample to a theoretical candidate distribution is the QQ plot. It is created by plotting quantiles of the theoretical distribution on the x-axis and empirical quantiles from the sample on the y-axis.
 ```{r, fig.show='hide'}
 b <- c()
 set.seed(42)
-for (i in 1:199) {
+for (i in 1:1000) {
   n <- rnorm(200, mean = 0, sd= 1)
   b[i] <- quantile(n, 0.5)
 }
 b <- sort(b)
-p <- seq(0.005,0.995, by = 0.005)
+p <- ppoints(1000)
 d <- qorder(p)
 g <- cbind(d, b)
-x <- seq(-0.25,0.25, by = ((0.5)/(199 - 1)))
+x <- seq(-0.25,0.25, by = ((0.5)/(1000 - 1)))
 y <- x
 ```
 
@@ -224,15 +233,15 @@ Q: Generate the QQ plot for simulated data from the sampling distribution of the
 ```{r, fig.show='hide'}
 b <- c()
 set.seed(0)
-for (i in 1:199) {
-  n <- rnorm(200, mean = 0, sd= 1)
+for (i in 1:1000) {
+  n <- rnorm(1000, mean = 0, sd= 1)
   b[i] <- quantile(n, 0.99)
 }
 b <- sort(b)
-p <- seq(0.005, 0.995, by = 0.005)
+p <- ppoints(1000)
 d <- qorder(p, 200)
 g <- cbind(d, b)
-x <- seq(1.5,3, by = ((1.5)/(199 - 1)))
+x <- seq(1.5,3, by = ((1.5)/(1000 - 1)))
 y <- x
 ```
 
@@ -246,7 +255,7 @@ ggplot(g) +
   theme_bw() +
   theme(plot.title = element_text(hjust=0.5))
 ```
-
+It can also be observed here that the two distributions are not in agreement with one another as the points of the plot are not inline with the `y = x` line on the chart. The deviation is worse than the one experienced for the qqplot for the median.
 
 Q: Modify the dorder, porder, and qorder functions so that the functions take new parameters dist and ... so that the functions will work for any continuous distribution that has d and p functions defined in R.
 
@@ -297,6 +306,8 @@ curve(porder(x, 1, dist = "norm", mean = 0, sd = 1), xlim = c(-5,-1), col = "blu
       xlab = "value",
       ylab = "probability")
 ```
+
+The values generated for the minimum value (i.e. first order statistic) do not follow that of a normally distributed curve like the one built for the median. There are more values in the left half of the density curve than in the right half. The cumulative distribution also highlights this phenomenon as the range of  values lie in the second region (i.e corresponding to a percentile > 0.5) are smaller than the ones in the first.
 
 # Conclusion
 

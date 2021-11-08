@@ -6,5 +6,5 @@
 - Probability Calculations: https://rpubs.com/Mabrouk12/probability-calculations
 - Home Advantage: https://rpubs.com/Muby/home-advantage
 - Log Transformation: https://rpubs.com/Mabrouk12/log-transform
-- Order Statistics: https://rpubs.com/Muby/order-statistics
+- Order Statistics: https://rpubs.com/Mabrouk12/order-statistics
 - Maximum Likelihood Estimate & Method of Moments: https://rpubs.com/Muby/mle-mm

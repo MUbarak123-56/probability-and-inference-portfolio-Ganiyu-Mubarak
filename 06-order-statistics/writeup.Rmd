@@ -175,7 +175,7 @@ y <- x
 ```{r, fig.width=10, fig.height=7}
 ggplot(g) +
   geom_point(aes(x = q, y = b), col = "red") +
-  geom_line(aes(x = x, y = y)) +
+  geom_smooth(aes(x = q, y = b), col = "black", method = "lm", se = F) +
   labs(title = "QQplot of the median (100th order statistic)",
        x = "Theoretical quantiles",
        y = "Sample quantiles") +
@@ -248,7 +248,7 @@ y <- x
 ```{r, fig.width=10, fig.height=7}
 ggplot(g) +
   geom_point(aes(x = q, y = b), col = "red") +
-  geom_line(aes(x = x, y = y)) +
+  geom_smooth(aes(x = q, y = b), col = "black", method = "lm", se = F, alpha = 0.2) +
   labs(title = "QQplot of maximum values",
        x = "Theoretical quantiles",
        y = "Sample quantiles") +

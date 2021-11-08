@@ -20,3 +20,88 @@ knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
 ```{r, include = FALSE}
 library(tidyverse)
 ```
+
+# Introduction
+
+# Methods & Results
+
+**Step: Generate a single sample from a standard normal distribution of size N=201. Explain to the reader how you use MLE to estimate the distribution.**
+
+```{r}
+set.seed(0)
+sima <- rnorm(201, mean = 0, sd = 1)
+nLL <- function(mean, sd){
+  fs <- dnorm(
+        x = sima
+      , mean = mean
+      , sd = sd
+      , log = TRUE
+    ) 
+  -sum(fs)
+}
+fit <- mle(nLL, start = list(mean=1,sd=1),method = "L-BFGS-B", 
+           lower = c(0, 0.01))
+fit
+```
+
+**Step: Show the reader how you approximate the sampling distribution of the median, conditional on the estimate of the distribution in the previous step.**
+
+```{r}
+q <- c()
+for (i in 1:1000) {
+  n <- rnorm(201, mean = coef(fit)[1], sd = coef(fit)[2])
+  q[i] <- quantile(n, 0.5)
+}
+```
+
+**Step: Describe how you calculate a 95% confidence interval from the approximated sampling distribution.**
+
+```{r}
+val <- quantile(q, c(0.025,0.975))
+sprintf("The 95 percent confident interval of the approximated sampling distribution goes from %.2f to %.2f", val[1], val[2])
+```
+
+**Step: Explain the concept of coverage probability. Explain your code for calculating the coverage probability.**
+
+The objective of coverage probability is to estimate the confidence intervals of a given population. This is done by using using estimated parameters to make inferences about the confidence interval of the population i.e. the middle p% of the population. p could be any positive number below 100.
+
+**Step: Perform the simulation and report the results.**
+
+```{r, fig.width = 10, fig.height = 7}
+d <- data.frame()
+q <- c()
+for (j in 1:20) {
+  for (i in 1:1000) {
+    n <- rnorm(201, mean = coef(fit)[1], sd = coef(fit)[2])
+    q[i] <- quantile(n, 0.5)
+    }
+  val <- quantile(q, c(0.025,0.975))
+  for (m in 1:2) {
+    d[j,m] <- val[m]
+  }
+}
+d <- d %>% 
+  rename(low_end = V1, high_end = V2) %>% 
+  mutate(ID = 1, new_ID = cumsum(ID)) %>% 
+  select(-ID)
+ggplot(d) +
+  geom_point(aes(x = low_end, y = new_ID), color = "red") +
+  geom_point(aes(x = high_end, y = new_ID), color = "blue") +
+  geom_point(aes(x=median(sima), y = 0), size = 3, color = "black") +
+  geom_text(x = median(sima) + 0.015, y = 0, 
+           label = "Median", color = "black") +
+  labs(title = "The middle 95 percent of median sampling distribution",
+       x = "Population Parameter of interest",
+       y = "Sample Number",
+       subtitle = "Red signifies the minimum value, blue signifies the maximum value") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust=0.5),
+        plot.subtitle = element_text(hjust=0.5))
+```
+
+```{r}
+?geom_text
+```
+**Step: Describe how you might change the simulation to learn more about the operating characteristics of your chosen method for constructing the 95% confidence interval.**
+
+# Conclusion

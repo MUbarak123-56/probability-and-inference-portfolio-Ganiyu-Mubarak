@@ -43,18 +43,13 @@ porder <- function(x) {
 }
 
 qorder <- function(p) {
-  r <- curve(porder(x),-5,5)
-  d <- data.frame(x = r$x, y = r$y)
-  d <- d %>% 
-    filter(y >= 0.005 & y <= 0.995)
-  n <- curve(porder(x),min(d$x), max(d$x))
-  m <- mean(n$x)
-  sd <- sd(n$x)
-  q <- c()
-  for (i in seq_along(p)) {
-    q[i] <- qnorm(p[i], mean = m, sd = sd)
+  q <- p
+  for(i in seq_along(p)){
+    q[i]<- uniroot(function(x){
+      porder(x) - p[i]}, 
+      c(-200, 200))$root
   }
-  df <- data.frame(p = p, q = q)
+  df <- data.frame(q = q)
   return(df)
 }
 ```
@@ -93,7 +88,7 @@ Upon evaluating the cumulative distribution function, it seems that it correctly
 
 Q: Write an R function that is the quantile function for the median in this sample. (You have several options for how to write this function.) Generate a plot of the function.
 ```{r, fig.show='hide'}
-p <- seq(0.01, 0.99, by = 0.01)
+p <- seq(0.001, 0.999, by = 0.998/(101-1))
 d <- qorder(p)
 ```
 
@@ -157,15 +152,15 @@ ggplot(n) +
 It turns out that pdf created via the analytical approach exhibits the same behavior as the histogram built through the simulated approach. However, there are likely to be discrepancies between values as they do not fit on each other perfectly well.
 
 Q: One very common way to compare a random sample to a theoretical candidate distribution is the QQ plot. It is created by plotting quantiles of the theoretical distribution on the x-axis and empirical quantiles from the sample on the y-axis.
+ 
 ```{r, fig.show='hide'}
 b <- c()
-set.seed(42)
-for (i in 1:1000) {
+for (i in 1:10000) {
   n <- rnorm(200, mean = 0, sd= 1)
-  b[i] <- quantile(n, 0.5)
+  b[i] <- median(n)
 }
-b <- sort(b)
-p <- ppoints(1000)
+p <- seq(0.005, 0.995, by = 0.99/(1000-1))
+b <- quantile(b, p)
 d <- qorder(p)
 g <- cbind(d, b)
 x <- seq(-0.25,0.25, by = ((0.5)/(1000 - 1)))
@@ -175,7 +170,7 @@ y <- x
 ```{r, fig.width=10, fig.height=7}
 ggplot(g) +
   geom_point(aes(x = q, y = b), col = "red") +
-  geom_smooth(aes(x = q, y = b), col = "black", method = "lm", se = F) +
+  geom_line(aes(x = x, y = y)) +
   labs(title = "QQplot of the median (100th order statistic)",
        x = "Theoretical quantiles",
        y = "Sample quantiles") +
@@ -183,7 +178,8 @@ ggplot(g) +
   theme(plot.title = element_text(hjust = 0.5),
         plot.subtitle = element_text(hjust = 0.5))
 ```
-The two distributions are not in agreement with one another as the points of the plot are not inline with the `y = x` line on the chart. This can be evidenced below when reviewing the probability density function distributions of the curves.
+
+The two distributions are closely related to one another but are not fully in agreement with one another as the points of the plot are not totally inline with the `y = x` line on the chart. This can be evidenced below when reviewing the probability density function distributions of the curves.
 
 ```{r}
 ggplot(g) +
@@ -212,18 +208,13 @@ porder <- function(x,k) {
 }
 
 qorder <- function(p,k) {
-  r <- curve(porder(x,k),-5,5)
-  d <- data.frame(x = r$x, y = r$y)
-  d <- d %>% 
-    filter(y >= 0.005 & y <= 0.995)
-  n <- curve(porder(x,k),min(d$x), max(d$x))
-  m <- mean(n$x)
-  sd <- sd(n$x)
-  q <- c()
-  for (i in seq_along(p)) {
-    q[i] <- qnorm(p[i], mean = m, sd = sd)
+  q <- p
+  for(i in seq_along(p)){
+    q[i]<- uniroot(function(x){
+      porder(x,k) - p[i]}, 
+      c(-200, 200))$root
   }
-  df <- data.frame(p = p, q = q)
+  df <- data.frame(q = q)
   return(df)
 }
 ```
@@ -232,30 +223,30 @@ Q: Generate the QQ plot for simulated data from the sampling distribution of the
 
 ```{r, fig.show='hide'}
 b <- c()
-set.seed(0)
-for (i in 1:1000) {
-  n <- rnorm(1000, mean = 0, sd= 1)
-  b[i] <- quantile(n, 0.99)
+for (i in 1:10000) {
+  n <- rnorm(200, mean = 0, sd= 1)
+  b[i] <- max(n)
 }
-b <- sort(b)
-p <- ppoints(1000)
+p <- seq(0.005, 0.995, by = 0.99/(1000-1))
+b <- quantile(b, p)
 d <- qorder(p, 200)
 g <- cbind(d, b)
-x <- seq(1.5,3, by = ((1.5)/(1000 - 1)))
+x <- seq(1.5,5, by = ((3.5)/(1000-1)))
 y <- x
 ```
 
 ```{r, fig.width=10, fig.height=7}
 ggplot(g) +
   geom_point(aes(x = q, y = b), col = "red") +
-  geom_smooth(aes(x = q, y = b), col = "black", method = "lm", se = F, alpha = 0.2) +
+  geom_line(aes(x = x, y = y), col = "black") +
   labs(title = "QQplot of maximum values",
        x = "Theoretical quantiles",
        y = "Sample quantiles") +
   theme_bw() +
   theme(plot.title = element_text(hjust=0.5))
 ```
-It can also be observed here that the two distributions are not in agreement with one another as the points of the plot are not inline with the `y = x` line on the chart. The deviation is worse than the one experienced for the qqplot for the median.
+
+It can also be observed here that the two distributions are in agreement with one another as the points of the plot are  inline with the `y = x` line on the chart. The deviation is similar to the one experienced for the qqplot for the median.
 
 Q: Modify the dorder, porder, and qorder functions so that the functions take new parameters dist and ... so that the functions will work for any continuous distribution that has d and p functions defined in R.
 
@@ -275,20 +266,14 @@ porder <- function(x,k, dist, ...) {
   pbinom(k-1, 200, Fm(x, ...), lower.tail = FALSE)
 }
 
-qorder <- function(p, k, dist, ...) {
-  qm <- eval(parse(text = str_c("q", dist, sep = "")))
-  r <- curve(porder(x,k,dist,...),-5,5)
-  d <- data.frame(x = r$x, y = r$y)
-  d <- d %>% 
-    filter(y >= 0.01 & y <= 0.999)
-  n <- curve(porder(x,k,dist,...),min(d$x), max(d$x))
-  m <- mean(n$x)
-  sd <- sd(n$x)
-  q <- c()
-  for (i in seq_along(p)) {
-    q[i] <- qm(p[i], mean = m, sd = sd)
+qorder <- function(p,k, dist, ...) {
+  q <- p
+  for(i in seq_along(p)){
+    q[i]<- uniroot(function(x){
+      porder(x,k, dist, ...) - p[i]}, 
+      c(-200, 200))$root
   }
-  df <- data.frame(p = p, q = q)
+  df <- data.frame(q = q)
   return(df)
 }
 ```
@@ -307,7 +292,7 @@ curve(porder(x, 1, dist = "norm", mean = 0, sd = 1), xlim = c(-5,-1), col = "blu
       ylab = "probability")
 ```
 
-The values generated for the minimum value (i.e. first order statistic) do not follow that of a normally distributed curve like the one built for the median. There are more values in the left half of the density curve than in the right half. The cumulative distribution also highlights this phenomenon as the range of  values lie in the second region (i.e corresponding to a percentile > 0.5) are smaller than the ones in the first.
+The values generated for the minimum value (i.e. first order statistic) do not follow that of a normally distributed curve like the one built for the median. There are more values in the left half of the density curve than in the right half. Hence, it is negatively skewed. The cumulative distribution also highlights this phenomenon as the range of  values lie in the second region (i.e corresponding to a percentile > 0.5) are smaller than the ones in the first.
 
 # Conclusion
 

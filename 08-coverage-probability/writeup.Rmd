@@ -70,7 +70,7 @@ The objective of coverage probability is to estimate the confidence intervals of
 ```{r, fig.width = 10, fig.height = 7}
 d <- data.frame()
 q <- c()
-for (j in 1:20) {
+for (j in 1:30) {
   for (i in 1:1000) {
     n <- rnorm(201, mean = coef(fit)[1], sd = coef(fit)[2])
     q[i] <- quantile(n, 0.5)
@@ -88,10 +88,10 @@ ggplot(d) +
   geom_point(aes(x = low_end, y = new_ID), color = "red") +
   geom_point(aes(x = high_end, y = new_ID), color = "blue") +
   geom_point(aes(x=median(sima), y = 0), size = 3, color = "black") +
-  geom_text(x = median(sima) + 0.015, y = 0, 
-           label = "Median", color = "black") +
+  geom_text(x = median(sima) + 0.025, y = 0, 
+           label = "Original median", color = "black") +
   labs(title = "The middle 95 percent of median sampling distribution",
-       x = "Population Parameter of interest",
+       x = "Range of medians",
        y = "Sample Number",
        subtitle = "Red signifies the minimum value, blue signifies the maximum value") +
   theme_bw() +
@@ -99,9 +99,7 @@ ggplot(d) +
         plot.subtitle = element_text(hjust=0.5))
 ```
 
-```{r}
-?geom_text
-```
+
 **Step: Describe how you might change the simulation to learn more about the operating characteristics of your chosen method for constructing the 95% confidence interval.**
 
 # Conclusion

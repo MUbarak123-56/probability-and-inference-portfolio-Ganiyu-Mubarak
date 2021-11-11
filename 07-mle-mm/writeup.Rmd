@@ -90,7 +90,7 @@ $$E(X)=shape*(Var(X) \div E(X))$$
 $$shape=E(X)^2/Var(X)$$
 Hence, shape and scale are calculated as:
 $$shape=5.72^2 \div 1.10==29.6$$
-$$shape=1.10 \div 5.72==0.19$$
+$$scale=1.10 \div 5.72==0.19$$
 **Normal**
 
 The normal distribution's parameters are mean and standard deviation.
@@ -575,6 +575,22 @@ v <- var(ht)
 mom_shape <- 27.4971
 mom_scale <- 163.976
 ```
+
+**Obtaining parameters via MOM**
+
+The parameters for weibull distribution are shape and scale.
+Lambda represents scale, k represents shape.
+
+$$E(X)=\Lambda\Gamma(1 + (1/k))$$
+
+$$Var(X)=\Lambda^2\Gamma(1 + (2/k))-E(X)^2$$
+$$160.7419=\Lambda\Gamma(1 + (1/k))$$
+$$53.58476= \Lambda^2\Gamma(1 + (2/k))-25837.95842$$
+$$25891.54318 = \Lambda^2\Gamma(1 + (2/k))$$
+Using simultaenous equations,
+
+$$\Lambda(scale) = 163.976$$
+$$k(shape) = 27.4971$$
 
 #### Estimated and Empirical distributions' comparison
 

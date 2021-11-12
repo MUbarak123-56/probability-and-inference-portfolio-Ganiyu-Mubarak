@@ -23,7 +23,11 @@ library(tidyverse)
 
 # Introduction
 
+In statistics, we often want to have a proper idea of what an outcome might look like so we resort to estimating the range of all the possibilities of that value. Coverage probability takes advantage of the confidence interval concept by running numerous simulations/samples in which a wide range of possible outcomes is generated for each sample. Then, these range of possible outcomes can be compared to the true value to see if they properly account for it in its range.
+
 # Methods & Results
+
+Below are some steps taken to calculate coverage probability as well as their outcomes. 
 
 **Step: Generate a single sample from a standard normal distribution of size N=201. Explain to the reader how you use MLE to estimate the distribution.**
 
@@ -44,6 +48,8 @@ fit <- mle(nLL, start = list(mean=1,sd=1),method = "L-BFGS-B",
 fit
 ```
 
+After building a set of randomly generated numbers with a mean of 0 and standard deviation of 1, MLE was used to estimate the parameters for the distribution by taking in the values and extracting the appropriate parameters under a normal distribution. It yielded a mean of `r coef(fit)[1]` and a standard deviation of `r coef(fit)[2]`
+
 **Step: Show the reader how you approximate the sampling distribution of the median, conditional on the estimate of the distribution in the previous step.**
 
 ```{r}
@@ -54,23 +60,28 @@ for (i in 1:1000) {
 }
 ```
 
+Using the paramters that were generated via MLE, it was possible to generate 201 random numbers using the `rnorm` function. Then, the median of this set of numbers was obtained. This process was repeated 1000 times in order to get 1000 median values.
+
 **Step: Describe how you calculate a 95% confidence interval from the approximated sampling distribution.**
 
 ```{r}
 val <- quantile(q, c(0.025,0.975))
 sprintf("The 95 percent confident interval of the approximated sampling distribution goes from %.2f to %.2f", val[1], val[2])
 ```
+Upon gathering the 1000 median values, the next step was to find the middle 95% of all the median values. Thus, the 2.5th percentile was obtained as well as the 97.5th percentile. This two values were used to highlight the range of the middle 95% of all the median values.
 
 **Step: Explain the concept of coverage probability. Explain your code for calculating the coverage probability.**
 
-The objective of coverage probability is to estimate the confidence intervals of a given population. This is done by using using estimated parameters to make inferences about the confidence interval of the population i.e. the middle p% of the population. p could be any positive number below 100.
+The objective of coverage probability is to estimate the proportion of confidence intervals that capture the population parameter of interest. After generating numerous samples (or median samples in the case of this deliverable), the confidence interval is obtained for each sample, this is done by obtianing the middle p% of the population. p could be any positive number below 100. Once, that is done each one is checked to verify that the actual median value lies within the middle p% of the samples. Then, the number of samples that meet this requirement is divided by the total number of samples. Hence, producing the coverage probability.
+
+The code below shows how a sampling distribution of 1000 median values were generated 30 times. For each simulation, the middle 95% of all the values were collected and compared with the actual median value. This can be seen in the resulting graph below. If the median value lies within middle 95% of all the median values from a sample, then that sample passes
 
 **Step: Perform the simulation and report the results.**
 
 ```{r, fig.width = 10, fig.height = 7}
 d <- data.frame()
 q <- c()
-for (j in 1:30) {
+for (j in 1:50) {
   for (i in 1:1000) {
     n <- rnorm(201, mean = coef(fit)[1], sd = coef(fit)[2])
     q[i] <- quantile(n, 0.5)
@@ -84,22 +95,36 @@ d <- d %>%
   rename(low_end = V1, high_end = V2) %>% 
   mutate(ID = 1, new_ID = cumsum(ID)) %>% 
   select(-ID)
+m <- median(sima)
+d <- d %>% 
+  mutate(cover = if_else(m > low_end & m < high_end, 1, 0))
+new_d <- d %>% 
+  filter(cover == 1)
+nrow(new_d)/nrow(d)
+```
+It turns out that the coverage probability is `r nrow(new_d)/nrow(d)`. This phenomenon can be witnessed in the chart below as all the intervals covered the median.
+
+```{r, fig.width = 10, fig.height = 7}
+d$cover = as.factor(d$cover)
 ggplot(d) +
-  geom_point(aes(x = low_end, y = new_ID), color = "red") +
-  geom_point(aes(x = high_end, y = new_ID), color = "blue") +
+  geom_point(aes(x = low_end, y = new_ID, color = cover)) +
+  geom_point(aes(x = high_end, y = new_ID, color = cover)) +
   geom_point(aes(x=median(sima), y = 0), size = 3, color = "black") +
-  geom_text(x = median(sima) + 0.025, y = 0, 
+  geom_text(x = median(sima) + 0.030, y = 0, 
            label = "Original median", color = "black") +
   labs(title = "The middle 95 percent of median sampling distribution",
        x = "Range of medians",
        y = "Sample Number",
-       subtitle = "Red signifies the minimum value, blue signifies the maximum value") +
+       subtitle = "1 means that the range covered the population parameter, 0 means that it didn't") +
   theme_bw() +
   theme(plot.title = element_text(hjust=0.5),
         plot.subtitle = element_text(hjust=0.5))
 ```
 
-
 **Step: Describe how you might change the simulation to learn more about the operating characteristics of your chosen method for constructing the 95% confidence interval.**
 
+One way to go about transforming the simulation would be to change the values of the mean and standard deviation that was used to create the original median. This will make it possible to witness what is likely to happen to the outputted ranges under a normal distribution that is not standard upon estimating parameters via MLE. Another way might be to increase the number of samples. This might yield a few failures.
+
 # Conclusion
+
+This was a great deliverable to highlight the importance of statistical thinking when working on estimating parameters like mean, median, variance and other statistical concepts. By generating a range of values, it provides the researcher with the ability to have an idea of where the outcome should lie.

@@ -19,6 +19,7 @@ knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
 
 ```{r, include = FALSE}
 library(tidyverse)
+require(dplyr)
 Hmisc::getHdata(nhgh)
 library(stats4)
 d1 <- nhgh %>% 
@@ -136,11 +137,9 @@ cdf <- function(y, dist, ..., word2) {
 
 qplot <- function(gh,dist, ..., word2) {
   qm <- eval(parse(text = str_c("q", dist, sep = "")))
-  rm <- eval(parse(text = str_c("r", dist, sep = "")))
-  Y <- rm(1000, ...)
   ps <- ppoints(1000)
   theoretical <- qm(ps, ...)
-  sample <- quantile(Y, ps)
+  sample <- quantile(gh, ps)
   plot(theoretical, sample, main = sprintf("QQPlot for %s distribution\n using %s", dist, word2),
        col = "blue")
   abline(0,1)
@@ -199,6 +198,9 @@ mle_sd <- coef(fit)[2]
 mom_mean <- mean(gh)
 mom_sd <- sqrt(var(gh))
 ```
+
+The maximum likelihood estimate parameters for gh are `r mle_mean` and `r mle_sd` for mean and standard deviation respectively. The method of moments parameters for gh are 
+`r mom_mean` and `r mom_sd` for mean and standard deviation respectively.
 
 #### Estimated and Empirical distributions' comparison
 
@@ -271,6 +273,8 @@ v <- var(gh)
 mom_shape <- m^2/v
 mom_scale <- v/m
 ```
+
+Under gamma distribution, the maximum likelihood estimate parameters for gh are `r mle_shape` and `r mle_scale` for shape and scale respectively. The method of moments parameters for gh are `r mom_shape` and `r mom_scale` for shape and scale respectively.
 
 #### Estimated and Empirical distributions' comparison
 
@@ -348,6 +352,7 @@ mom_shape <- 6.3478
 mom_scale <- 6.1516
 ```
 
+Under weibull distribution, the maximum likelihood estimate parameters for gh are `r mle_shape` and `r mle_scale` for shape and scale respectively. The method of moments parameters for gh are `r mom_shape` and `r mom_scale` for shape and scale respectively.
 
 #### Estimated and Empirical distributions' comparison
 
@@ -427,6 +432,8 @@ mom_mean <- mean(ht)
 mom_sd <- sqrt(var(ht))
 ```
 
+Under normal distribution, the maximum likelihood estimate parameters for gh are `r mle_mean` and `r mle_sd` for shape and scale respectively. The method of moments parameters for gh are `r mom_mean` and `r mom_sd` for shape and scale respectively.
+
 #### Estimated and Empirical distributions' comparison
 
 ```{r, fig.height = 7, fig.width = 10}
@@ -498,6 +505,8 @@ v <- var(ht)
 mom_shape <- m^2/v
 mom_scale <- v/m
 ```
+
+Under gamma distribution, the maximum likelihood estimate parameters for gh are `r mle_shape` and `r mle_scale` for shape and scale respectively. The method of moments parameters for gh are `r mom_shape` and `r mom_scale` for shape and scale respectively.
 
 #### Estimated and Empirical distributions' comparison
 
@@ -575,6 +584,8 @@ v <- var(ht)
 mom_shape <- 27.4971
 mom_scale <- 163.976
 ```
+
+Under weibull distribution, the maximum likelihood estimate parameters for ht are `r mle_shape` and `r mle_scale` for shape and scale respectively. The method of moments parameters for gh are `r mom_shape` and `r mom_scale` for shape and scale respectively.
 
 **Obtaining parameters via MOM**
 

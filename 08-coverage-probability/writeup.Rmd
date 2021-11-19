@@ -19,6 +19,7 @@ knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
 
 ```{r, include = FALSE}
 library(tidyverse)
+library(stats4)
 ```
 
 # Introduction
@@ -45,7 +46,6 @@ nLL <- function(mean, sd){
 }
 fit <- mle(nLL, start = list(mean=1,sd=1),method = "L-BFGS-B", 
            lower = c(0, 0.01))
-fit
 ```
 
 After building a set of randomly generated numbers with a mean of 0 and standard deviation of 1, MLE was used to estimate the parameters for the distribution by taking in the values and extracting the appropriate parameters under a normal distribution. It yielded a mean of `r coef(fit)[1]` and a standard deviation of `r coef(fit)[2]`
@@ -60,7 +60,7 @@ for (i in 1:1000) {
 }
 ```
 
-Using the paramters that were generated via MLE, it was possible to generate 201 random numbers using the `rnorm` function. Then, the median of this set of numbers was obtained. This process was repeated 1000 times in order to get 1000 median values.
+Using the parameters that were generated via MLE, it was possible to generate 201 random numbers using the `rnorm` function. Then, the median of this set of numbers was obtained. This process was repeated 1000 times in order to get 1000 median values.
 
 **Step: Describe how you calculate a 95% confidence interval from the approximated sampling distribution.**
 

@@ -7,4 +7,5 @@
 - Home Advantage: https://rpubs.com/Muby/home-advantage
 - Log Transformation: https://rpubs.com/Mabrouk12/log-transform
 - Order Statistics: https://rpubs.com/Mabrouk12/order-statistics
-- Maximum Likelihood Estimate & Method of Moments: https://rpubs.com/Mabrouk12/830758
+- Maximum Likelihood Estimate & Method of Moments: https://rpubs.com/Muby/830399
+- Coverage Probability: 

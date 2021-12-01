@@ -56,7 +56,7 @@ After building a set of randomly generated numbers with a mean of 0 and standard
 q <- c()
 for (i in 1:1000) {
   n <- rnorm(201, mean = coef(fit)[1], sd = coef(fit)[2])
-  q[i] <- quantile(n, 0.5)
+  q[i] <- median(n)
 }
 ```
 
@@ -74,19 +74,19 @@ Upon gathering the 1000 median values, the next step was to find the middle 95% 
 
 The objective of coverage probability is to estimate the proportion of confidence intervals that capture the population parameter of interest. After generating numerous samples (or median samples in the case of this deliverable), the confidence interval is obtained for each sample, this is done by obtianing the middle p% of the population. p could be any positive number below 100. Once, that is done each one is checked to verify that the actual median value lies within the middle p% of the samples. Then, the number of samples that meet this requirement is divided by the total number of samples. Hence, producing the coverage probability.
 
-The code below shows how a sampling distribution of 1000 median values were generated 30 times. For each simulation, the middle 95% of all the values were collected and compared with the actual median value. This can be seen in the resulting graph below. If the median value lies within middle 95% of all the median values from a sample, then that sample passes
+The code below shows how a sampling distribution of 1000 median values were generated 50 times. For each simulation, the middle 95% of all the values were collected and compared with the actual median value. This can be seen in the resulting graph below. If the median value lies within middle 95% of all the median values from a sample, then that sample passes
 
 **Step: Perform the simulation and report the results.**
 
 ```{r, fig.width = 10, fig.height = 7}
 d <- data.frame()
-q <- c()
+q2 <- c()
 for (j in 1:50) {
-  for (i in 1:1000) {
+  for (i in 1:100) {
     n <- rnorm(201, mean = coef(fit)[1], sd = coef(fit)[2])
-    q[i] <- quantile(n, 0.5)
+    q2[i] <- median(n)
     }
-  val <- quantile(q, c(0.025,0.975))
+  val <- quantile(q2, c(0.025,0.975))
   for (m in 1:2) {
     d[j,m] <- val[m]
   }
@@ -96,13 +96,15 @@ d <- d %>%
   mutate(ID = 1, new_ID = cumsum(ID)) %>% 
   select(-ID)
 m <- median(sima)
+new_val <- quantile(q, c(0.025, 0.975))
 d <- d %>% 
-  mutate(cover = if_else(m > low_end & m < high_end, 1, 0))
+  mutate(cover = if_else((low_end < m & high_end > m), 1, 0))
 new_d <- d %>% 
   filter(cover == 1)
 nrow(new_d)/nrow(d)
 ```
-It turns out that the coverage probability is `r nrow(new_d)/nrow(d)`. This phenomenon can be witnessed in the chart below as all the intervals covered the median.
+
+It turns out that the coverage probability is `r nrow(new_d)/nrow(d)`. This phenomenon can be witnessed in the chart below.
 
 ```{r, fig.width = 10, fig.height = 7}
 d$cover = as.factor(d$cover)
@@ -111,7 +113,7 @@ ggplot(d) +
   geom_point(aes(x = high_end, y = new_ID, color = cover)) +
   geom_point(aes(x=median(sima), y = 0), size = 3, color = "black") +
   geom_text(x = median(sima) + 0.030, y = 0, 
-           label = "Original median", color = "black") +
+            label = "Original median", color = "black") +
   labs(title = "The middle 95 percent of median sampling distribution",
        x = "Range of medians",
        y = "Sample Number",
@@ -123,7 +125,7 @@ ggplot(d) +
 
 **Step: Describe how you might change the simulation to learn more about the operating characteristics of your chosen method for constructing the 95% confidence interval.**
 
-One way to go about transforming the simulation would be to change the values of the mean and standard deviation that was used to create the original median. This will make it possible to witness what is likely to happen to the outputted ranges under a normal distribution that is not standard upon estimating parameters via MLE. Another way might be to increase the number of samples. This might yield a few failures.
+One way to go about transforming the simulation would be to change the values of the mean and standard deviation that was used to create the original median. This will make it possible to witness what is likely to happen to the outputted ranges under a normal distribution that is not standard upon estimating parameters via MLE. Another way might be to increase the number of samples. This might yield more few failures.
 
 # Conclusion
 

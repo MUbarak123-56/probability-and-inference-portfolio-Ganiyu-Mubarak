@@ -472,7 +472,7 @@ sd = sd(d1_female_18)
 var = var(d1_female_18)
 shape = mean^2/var
 scale = var/mean
-hist(d1_female_18, freq = FALSE, main = "Distribution of adult females' heights",
+hist(d1_female_18, freq = FALSE, main = "Distribution of adult females' bmi",
      xlab = "BMI", ylim = c(0, 0.08))
 curve(dgamma(x, shape = shape, scale = scale), add = TRUE, col = "blue")
 ```

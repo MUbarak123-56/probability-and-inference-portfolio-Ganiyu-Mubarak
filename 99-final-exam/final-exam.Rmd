@@ -132,9 +132,11 @@ D <- function(N) {
     }
   }
   d <- d %>% mutate(second_win = if_else(V1 == "goat" & V2 == "car", 1, 0))
+  d <- d %>% mutate(first_win = if_else(V1 == "car" & V2 == "goat", 1, 0))
   d_second <- d %>% filter(second_win == 1)
+  d_first <- d %>% filter(first_win == 1)
   second_win <- nrow(d_second)/nrow(d)
-  first_win <- 1 - (nrow(d_second)/nrow(d))
+  first_win <- nrow(d_first)/nrow(d)
   prob <- second_win - first_win
   return(prob)
 }
@@ -153,7 +155,7 @@ ggplot(df) +
   theme(plot.title = element_text(hjust=0.5))
 ```
 
-As N increases, D(N) reduces. Hence, there is a better chance to win via strategy 1 as the number of doors increases due to probability of winning via strategy 1 exceeding that of winning via strategy 2.
+Generally, as N increases, D(N) reduces. However, there is still a better chance of winning via strategy 2 as D(N) >= 0.
 
 # 2. Probability
 
@@ -208,7 +210,7 @@ plot(prevalence, ppv, xlab = "Prevalence", ylab = "PPV")
 $$P(D+|T+)=P(T+|D+)*P(D+)\div P(T+)$$
 According to our table above,
 $$P(T+|D+)=0.85$$
-$$P(D+)=0.0508$$
+$$P(T+)=0.0508$$
 $$P(D+|T+)=0.85*P(D+)\div 0.0508$$
 
 ```{r, fig.width = 10, fig.height = 8}
@@ -238,7 +240,7 @@ hospital_charges <- function(N){
 
 ```{r}
 ninetieth <- quantile(hospital_charges(13500), 0.9) 
-# 12000 students used because there are about 12000 students at Vanderbilt
+# 13500 students used because there are about 13500 students at Vanderbilt
 sprintf("The 90th percentile for yearly hospital charges for a randomly selected Vanderbilt student is: %.2f (in thousands of dollars)", ninetieth)
 ```
 
@@ -251,7 +253,7 @@ avg <- c()
 for (i in 1:1000) {
   avg[i] <- mean(hospital_charges(30))
 }
-hist(avg, freq = FALSE, main = "Distribution of class average yearly hospital charge", xlab = "Charge (in 1000)")
+hist(avg, freq = FALSE, main = "Distribution of class average yearly hospital charge", xlab = "Charge (in 1000 dollars)")
 ```
 
 **A**.  What is the probability that a randomly selected class of size 30 students will have less than 10 students with zero yearly hospital charges?

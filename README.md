@@ -9,3 +9,4 @@
 - Order Statistics: https://rpubs.com/Mabrouk12/order-statistics
 - Maximum Likelihood Estimate & Method of Moments: https://rpubs.com/Muby/830399
 - Coverage Probability: https://rpubs.com/Mabrouk12/841924
+- Final Exam: https://rpubs.com/Muby/final-exam

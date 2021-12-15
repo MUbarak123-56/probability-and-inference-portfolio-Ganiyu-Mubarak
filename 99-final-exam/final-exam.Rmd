@@ -25,7 +25,7 @@ nhgh <- read.csv("~/probability-and-inference-portfolio-Ganiyu-Mubarak/nhgh.csv"
 dim(nhgh)
 ```
 
-# Instructions
+## Instructions
 
 The final exam will be a one-on-one oral exam with the instructor.  Please meet the instructor near the "fish-bowl" office in the Data Science Institute lobby. The exam will be recorded in Zoom. Please prepare solutions to the following is a set of questions. During the oral exam, the instructor will ask a series of questions covering topics from the course and the questions. For example, the instructor may ask:
 
